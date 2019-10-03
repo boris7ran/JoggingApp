@@ -5,3 +5,7 @@ register:
 store_user:
     path: /register/user
     controller: App\Controller\RegisterController::store
+
+login_user:
+    path: /login
+    controller: App\Controller\LoginController::index
