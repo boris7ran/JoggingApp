@@ -5,15 +5,24 @@ namespace App\Controller;
 use App\Entity\User;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class RegisterController extends AbstractController
 {
+    /**
+     * @return Response
+     */
     public function index()
     {
         return $this->render('register.html.twig');
     }
 
-    public function store(Request $request)
+    /**
+     * @param Request $request
+     *
+     * @return Response
+     */
+    public function store(Request $request): Response
     {
         $entityManager = $this->getDoctrine()->getManager();
 
@@ -25,6 +34,6 @@ class RegisterController extends AbstractController
 
         $entityManager->flush();
 
-        return new Response('Saved new product with id '.$user->getId());
+        return new Response('Saved new user with id '.$user->getId());
     }
 }
