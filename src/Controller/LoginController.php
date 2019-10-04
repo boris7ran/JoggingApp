@@ -27,18 +27,6 @@ class LoginController extends AbstractController
      */
     public function store(Request $request)
     {
-        $requestUsername = $request->get('name');
-
-        $user = $this->getDoctrine()
-            ->getRepository(User::class)
-            ->findOneBy(['username' => $requestUsername]);
-
-        if (!$user) {
-            throw new Exception('No user found with username: ' . $requestUsername );
-        } elseif ($user->getPassword() !== $request->get('password')) {
-            throw new Exception('Incorrect password');
-        }
-
-        return new Response('User found with username: '.$user->getUsername());
+        return new Response('User found with username');
     }
 }

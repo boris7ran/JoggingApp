@@ -4,7 +4,7 @@
 
 {% block body %}
     <h1>Login User</h1>
-    <form method="POST" action="{{ path('auth_user') }}">
+    <form method="POST">
 
         <div class="form-group">
             <label for="name">Username</label>
@@ -15,6 +15,8 @@
             <label for="password">Password</label>
             <input type="text" class="form-group" id="password" name="password">
         </div>
+
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
 
         <div class="form-group">
             <button type="submit" class="btn btn-primary">Login</button>

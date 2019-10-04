@@ -6,6 +6,7 @@ use App\Entity\User;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class RegisterController extends AbstractController
@@ -31,16 +32,21 @@ class RegisterController extends AbstractController
 
     /**
      * @param Request $request
+     * @param UserPasswordEncoderInterface $passwordEncoder
      *
      * @return Response
      */
-    public function store(Request $request): Response
+    public function store(Request $request, UserPasswordEncoderInterface $passwordEncoder): Response
     {
         $entityManager = $this->getDoctrine()->getManager();
 
         $user = new User();
         $user->setUsername($request->get('name'));
         $user->setPassword($request->get('password'));
+        $user->setRole("ROLE_USER");
+
+        $password = $passwordEncoder->encodePassword($user, $user->getPassword());
+        $user->setPassword($password);
 
         $errors = $this->validator->validate($user);
 
