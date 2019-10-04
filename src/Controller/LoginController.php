@@ -10,11 +10,21 @@ use Symfony\Component\HttpFoundation\Response;
 
 class LoginController extends AbstractController
 {
+    /**
+     * @return Response
+     */
     public function index()
     {
         return $this->render('auth\login.html.twig');
     }
 
+    /**
+     * @param Request $request
+     *
+     * @return Response
+     *
+     * @throws Exception
+     */
     public function store(Request $request)
     {
         $requestUsername = $request->get('name');
