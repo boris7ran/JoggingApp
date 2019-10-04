@@ -1,30 +1,23 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'base.html.twig' %}
 
-    <head>
-        <title>Register User</title>
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    </head>
+{% block title %}Register user {% endblock %}
 
-    <body>
-        {{ include('partials/header.html.twig') }}
-        <h1>Register User</h1>
-        <form method="POST" action="{{ path('store_user') }}">
+{% block body %}
+    <h1>Register User</h1>
+    <form method="POST" action="{{ path('store_user') }}">
 
-            <div class="form-group">
-                <label for="name">Username</label>
-                <input type="text" class="form-group" id="name" name="name">
-            </div>
+        <div class="form-group">
+            <label for="name">Username</label>
+            <input type="text" class="form-group" id="name" name="name">
+        </div>
 
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="text" class="form-group" id="password" name="password">
-            </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="text" class="form-group" id="password" name="password">
+        </div>
 
-            <div class="form-group">
-                <button type="submit" class="btn btn-primary">Register</button>
-            </div>
-        </form>
-    </body>
-
-</html>
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary">Register</button>
+        </div>
+    </form>
+{% endblock %}
