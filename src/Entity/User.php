@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Mapping\ClassMetadata;
@@ -35,6 +37,16 @@ class User implements UserInterface
     private $role;
 
     private $roles;
+
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\Record", mappedBy="user_id", orphanRemoval=true)
+     */
+    private $records;
+
+    public function __construct()
+    {
+        $this->records = new ArrayCollection();
+    }
 
     /**
      * @return int
@@ -140,5 +152,36 @@ class User implements UserInterface
         }
 
         return true;
+    }
+
+    /**
+     * @return Collection|Record[]
+     */
+    public function getRecords(): Collection
+    {
+        return $this->records;
+    }
+
+    public function addRecord(Record $record): self
+    {
+        if (!$this->records->contains($record)) {
+            $this->records[] = $record;
+            $record->setUserId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRecord(Record $record): self
+    {
+        if ($this->records->contains($record)) {
+            $this->records->removeElement($record);
+            // set the owning side to null (unless already changed)
+            if ($record->getUserId() === $this) {
+                $record->setUserId(null);
+            }
+        }
+
+        return $this;
     }
 }

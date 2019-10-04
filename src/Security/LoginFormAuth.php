@@ -8,6 +8,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
@@ -28,13 +29,20 @@ class LoginFormAuth extends AbstractFormLoginAuthenticator
     private $router;
     private $csrfTokenManager;
     private $passwordEncoder;
+    private $tokenStorage;
 
-    public function __construct(EntityManagerInterface $entityManager, RouterInterface $router, CsrfTokenManagerInterface $csrfTokenManager, UserPasswordEncoderInterface $passwordEncoder)
-    {
+    public function __construct(
+        EntityManagerInterface $entityManager,
+        RouterInterface $router,
+        CsrfTokenManagerInterface $csrfTokenManager,
+        UserPasswordEncoderInterface $passwordEncoder,
+        TokenStorageInterface $tokenStorage
+    ) {
         $this->entityManager = $entityManager;
         $this->router = $router;
         $this->csrfTokenManager = $csrfTokenManager;
         $this->passwordEncoder = $passwordEncoder;
+        $this->tokenStorage = $tokenStorage;
     }
 
     public function supports(Request $request)
@@ -86,7 +94,11 @@ class LoginFormAuth extends AbstractFormLoginAuthenticator
             return new RedirectResponse($targetPath);
         }
 
-        return new RedirectResponse($this->router->generate('register'));
+        $user = $this->tokenStorage->getToken()->getUser();
+
+        return new RedirectResponse(
+            $this->router->generate('show_records', ['id' => $user->getId()])
+        );
     }
 
     protected function getLoginUrl()
