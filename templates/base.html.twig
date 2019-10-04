@@ -7,8 +7,11 @@
         {% block stylesheets %}{% endblock %}
     </head>
     <body>
-        {{ include('partials/header.html.twig') }}
+        <header>{{ include('partials/header.html.twig') }}</header>
+
         {% block body %}{% endblock %}
         {% block javascripts %}{% endblock %}
+
+        {{ include('partials/footer.html.twig') }}
     </body>
 </html>

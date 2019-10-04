@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="en">
+    <body>
+        <footer>
+            {% if app.user %}
+            <div>
+                <button><a href="{{ path('logout_user') }}">Logout</a></button>
+            </div>
+            {% endif %}
+        </footer>
+    </body>
+</html>
