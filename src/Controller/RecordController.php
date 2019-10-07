@@ -41,4 +41,15 @@ class RecordController extends AbstractController
 
         return new Response('Saved new record with id '. $record->getId());
     }
+
+    public function delete(Request $request, $id)
+    {
+        $entityManager = $this->getDoctrine()->getManager();
+        $record = $entityManager->getRepository(Record::class)->find($id);
+
+        $entityManager->remove($record);
+        $entityManager->flush();
+
+        return new Response('Deleted record with id: ' . $record->getId());
+    }
 }

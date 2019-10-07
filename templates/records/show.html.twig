@@ -8,17 +8,21 @@
     <table class="table table-stripped table-bordered table-hover" style="width: 50%">
         <thead class="thead-dark">
         <tr>
-            <th width="50px">ID</th>
-            <th width="250px">Distance</th>
-            <th width="250px">Time</th>
+            <th width="10%">ID</th>
+            <th width="25%">Distance</th>
+            <th width="25%">Time</th>
+            <th width="25%">Average Speed</th>
+            <th width="15%">Actions</th>
         </tr>
         </thead>
 
         {% for record in user.getRecords %}
             <tr>
                 <td>{{ record.getId }}</td>
-                <td>{{ record.distance }}</td>
-                <td>{{ record.time }}</td>
+                <td>{{ record.distance }} km</td>
+                <td>{{ record.time }} sec</td>
+                <td>{{ record.distance/record.time }}</td>
+                <td><button><a href="{{ path('delete_record', {'id': record.getId}) }}">Delete</a></button></td>
             </tr>
         {% endfor %}
     </table>
