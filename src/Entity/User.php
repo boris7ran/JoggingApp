@@ -36,6 +36,9 @@ class User implements UserInterface
      */
     private $role;
 
+    /**
+     * @var
+     */
     private $roles;
 
     /**
@@ -132,7 +135,7 @@ class User implements UserInterface
     {
         $roles = $this->roles;
         // guarantee every user at least has ROLE_USER
-        $roles[] = 'ROLE_USER';
+        $roles[] = $this->role;
 
         return array_unique($roles);
     }

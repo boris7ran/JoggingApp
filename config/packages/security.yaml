@@ -27,9 +27,15 @@ security:
         App\Entity\User:
             algorithm: auto
 
+    role_hierarchy:
+        ROLE_MANAGER: ROLE_USER
+        ROLE_ADMIN: ROLE_MANAGER
+
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
         # - { path: ^/admin, roles: ROLE_ADMIN }
         # - { path: ^/profile, roles: ROLE_USER }
         - { path: /login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: /users, roles: ROLE_MANAGER }
+        - { path: /records/, roles: ROLE_USER }

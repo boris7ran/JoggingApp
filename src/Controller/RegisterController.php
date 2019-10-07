@@ -43,7 +43,12 @@ class RegisterController extends AbstractController
         $user = new User();
         $user->setUsername($request->get('name'));
         $user->setPassword($request->get('password'));
-        $user->setRole("ROLE_USER");
+
+        if ($entityManager->getRepository(User::class)->findBy(['role' => 'ROLE_ADMIN'])) {
+            $user->setRole("ROLE_USER");
+        } else {
+            $user->setRole("ROLE_ADMIN");
+        }
 
         $password = $passwordEncoder->encodePassword($user, $user->getPassword());
         $user->setPassword($password);
