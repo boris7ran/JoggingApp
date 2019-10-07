@@ -17,3 +17,7 @@ logout_user:
 show_records:
     path: /records/{id}
     controller: App\Controller\RecordController::show
+
+store_record:
+    path: /records/user/{id}
+    controller: App\Controller\RecordController::store

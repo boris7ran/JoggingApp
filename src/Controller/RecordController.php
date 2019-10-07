@@ -2,9 +2,11 @@
 
 namespace App\Controller;
 
+use App\Entity\Record;
 use App\Entity\User;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class RecordController extends AbstractController
@@ -18,5 +20,25 @@ class RecordController extends AbstractController
         }
 
         return $this->render('records/show.html.twig', ['user' => $user]);
+    }
+
+    public function store(Request $request, $id)
+    {
+        $entityManager = $this->getDoctrine()->getManager();
+
+        $record = new Record();
+        $date = \DateTime::createFromFormat("Y-m-d", $request->get('date'));
+        $record->setDate($date);
+        $record->setDistance($request->get('distance'));
+        $record->setTime($request->get('time'));
+
+        $user = $this->getDoctrine()->getRepository(User::class)->find($id);
+        $record->setUser($user);
+
+        $entityManager->persist($record);
+
+        $entityManager->flush();
+
+        return new Response('Saved new record with id '. $record->getId());
     }
 }
