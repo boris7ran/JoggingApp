@@ -3,9 +3,9 @@
     <body>
         <footer>
             {% if app.user %}
-            <div>
-                <button><a href="{{ path('logout_user') }}">Logout</a></button>
-            </div>
+                <div class="ml-1 mt-5">
+                    <button><a href="{{ path('logout_user') }}">Logout</a></button>
+                </div>
             {% endif %}
         </footer>
     </body>

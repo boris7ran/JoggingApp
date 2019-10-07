@@ -3,9 +3,11 @@
 {% block title %}User Records{% endblock %}
 
 {% block body %}
-    <ul>
+    <h1 class="m-4">LIST OF ALL USERS</h1>
+
+    <ul class="list-group col-sm-5 ml-2">
         {% for user in users %}
-            <li><a href="{{ path('show_records', {'id': user.getId}) }}">{{ user.getUsername }}</a></li>
+            <li class="list-group-item"><a href="{{ path('show_records', {'id': user.getId}) }}">{{ user.getUsername }}</a></li>
         {% endfor %}
     </ul>
 {% endblock %}
