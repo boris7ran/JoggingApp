@@ -18,14 +18,30 @@ show_records:
     path: /records/{id}
     controller: App\Controller\RecordController::show
 
-delete_record:
-    path: /records/delete/{id}
-    controller: App\Controller\RecordController:delete
+my_records:
+    path: /my_records
+    controller: App\Controller\RecordController::myRecords
 
 store_record:
     path: /records/user/{id}
     controller: App\Controller\RecordController::store
 
+edit_record:
+    path: /records/edit/{id}
+    controller: App\Controller\RecordController::edit
+
+put_record:
+    path: /records/put/{id}
+    controller: App\Controller\RecordController::put
+
+delete_record:
+    path: /records/delete/{id}
+    controller: App\Controller\RecordController:delete
+
 all_users:
     path: /users
     controller: App\Controller\UserController::index
+
+edit_role:
+    path: /user/{id}/role
+    controller: App\Controller\UserController::upgrade

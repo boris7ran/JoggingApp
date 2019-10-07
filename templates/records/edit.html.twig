@@ -1,0 +1,26 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit Record {{ record.getId }}{% endblock %}
+
+{% block body %}
+    <form method="POST" action="{{ path('put_record', {'id': record.getId}) }}"  class="pt-5">
+        <div class="form-group row m-1">
+            <label for="date" class="form-control col-sm-2">Date</label>
+            <input type="date" class="form-control col-sm-4" id="date" name="date" value="{% if record %}{{ record.getDate.format("Y-m-d") }}{% endif %}" >
+        </div>
+
+        <div class="form-group row m-1">
+            <label for="distance" class="form-control col-sm-2">Distance</label>
+            <input type="number" class="form-control col-sm-4" id="distance" name="distance" {% if record %} value="{{ record.getDistance }}" {% endif %}>
+        </div>
+
+        <div class="form-group row m-1">
+            <label for="time" class="form-control col-sm-2">Time</label>
+            <input type="text" class="form-control col-sm-4" id="time" name="time" value="{% if record %}{{ record.getTime }}{% endif %}">
+        </div>
+
+        <div class="form-group m-1">
+            <button type="submit" class="btn btn-primary">Submit Record</button>
+        </div>
+    </form>
+{% endblock %}
