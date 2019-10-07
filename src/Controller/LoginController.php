@@ -17,16 +17,4 @@ class LoginController extends AbstractController
     {
         return $this->render('auth\login.html.twig');
     }
-
-    /**
-     * @param Request $request
-     *
-     * @return Response
-     *
-     * @throws Exception
-     */
-    public function store(Request $request)
-    {
-        return new Response('User found with username');
-    }
 }

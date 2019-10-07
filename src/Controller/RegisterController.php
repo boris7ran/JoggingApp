@@ -65,6 +65,6 @@ class RegisterController extends AbstractController
 
         $entityManager->flush();
 
-        return new Response('Saved new user with id '.$user->getId());
+        return $this->redirectToRoute('login_user');
     }
 }

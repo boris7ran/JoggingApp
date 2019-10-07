@@ -6,9 +6,7 @@ use App\Entity\Record;
 use App\Entity\User;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\File\Exception\AccessDeniedException;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 
 class RecordController extends AbstractController
 {
@@ -47,7 +45,7 @@ class RecordController extends AbstractController
 
         $entityManager->flush();
 
-        return new Response('Saved new record with id ' . $record->getId());
+        return $this->redirectToRoute('show_records', ['id' => $id]);
     }
 
     public function edit($id)
@@ -74,7 +72,7 @@ class RecordController extends AbstractController
 
         $entityManager->flush();
 
-        return new Response('Edited record with id ' . $record->getId());
+        return $this->redirectToRoute('show_records', ['id' => $record->getUser()->getId()]);
     }
 
     public function delete($id)
@@ -85,6 +83,6 @@ class RecordController extends AbstractController
         $entityManager->remove($record);
         $entityManager->flush();
 
-        return new Response('Deleted record with id: ' . $record->getId());
+        return $this->redirectToRoute('show_records', ['id' => $record->getUser()->getId()]);
     }
 }
