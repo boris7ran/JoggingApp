@@ -11,13 +11,25 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class UsersService
 {
+    /**
+     * @var EntityManagerInterface
+     */
     private $em;
+    /**
+     * @var User
+     */
     private $user;
     /**
      * @var ValidatorInterface
      */
     private $validator;
 
+    /**
+     * UsersService constructor.
+     * @param EntityManagerInterface $em
+     * @param TokenStorageInterface $tokenStorage
+     * @param ValidatorInterface $validator
+     */
     public function __construct(EntityManagerInterface $em, TokenStorageInterface $tokenStorage, ValidatorInterface $validator)
     {
         $this->em = $em;
@@ -25,7 +37,10 @@ class UsersService
         $this->validator = $validator;
     }
 
-    public function getUsers()
+    /**
+     * @return User[]
+     */
+    public function getUsers(): array
     {
         if ($this->user->getRole() === 'ROLE_ADMIN') {
             $users = $this->em->getRepository(User::class)->findAll();
@@ -36,7 +51,13 @@ class UsersService
         return $users;
     }
 
-    public function upgradeUser(Request $request, int $id)
+    /**
+     * @param Request $request
+     * @param int $id
+     *
+     * @return User
+     */
+    public function upgradeUser(Request $request, int $id): User
     {
         $user = $this->em->getRepository(User::class)->find($id);
 

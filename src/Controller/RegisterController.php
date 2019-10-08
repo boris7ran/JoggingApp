@@ -16,6 +16,10 @@ class RegisterController extends AbstractController
      */
     private $authService;
 
+    /**
+     * RegisterController constructor.
+     * @param AuthService $authService
+     */
     public function __construct(AuthService $authService)
     {
         $this->authService = $authService;

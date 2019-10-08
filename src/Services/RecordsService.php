@@ -11,16 +11,36 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 
 class RecordsService
 {
+    /**
+     * @var EntityManagerInterface
+     */
     private $em;
+    /**
+     * @var object|string
+     */
     private $user;
 
+    /**
+     * RecordsService constructor.
+     * @param EntityManagerInterface $em
+     * @param TokenStorageInterface $tokenStorage
+     */
     public function __construct(EntityManagerInterface $em, TokenStorageInterface $tokenStorage)
     {
         $this->em = $em;
         $this->user = $tokenStorage->getToken()->getUser();
     }
 
-    public function getUserRecords($id = null, $startDate = null, $endDate = null)
+    /**
+     * @param int|null $id
+     * @param string|null $startDate
+     * @param string|null $endDate
+     *
+     * @return User
+     *
+     * @throws Exception
+     */
+    public function getUserRecords(int $id = null, string $startDate = null, string $endDate = null): User
     {
         if ($startDate) {
             $startDate = \DateTime::createFromFormat("Y-m-d", $startDate);
@@ -46,7 +66,13 @@ class RecordsService
         return $user;
     }
 
-    public function storeNewRecord(Request $request, int $id)
+    /**
+     * @param Request $request
+     * @param int $id
+     *
+     * @return Record
+     */
+    public function storeNewRecord(Request $request, int $id): Record
     {
         $record = new Record();
 
@@ -55,14 +81,25 @@ class RecordsService
         return $record;
     }
 
-    public function editRecord($id)
+    /**
+     * @param int $id
+     *
+     * @return Record
+     */
+    public function editRecord(int $id): Record
     {
         $record = $this->em->getRepository(Record::class)->find($id);
 
         return $record;
     }
 
-    public function putEditedRecord(Request $request, int $id)
+    /**
+     * @param Request $request
+     * @param int $id
+     *
+     * @return Record
+     */
+    public function putEditedRecord(Request $request, int $id): Record
     {
         $record = $this->em->getRepository(Record::class)->find($id);
 
@@ -71,7 +108,11 @@ class RecordsService
         return $record;
     }
 
-    public function deleteRecord(int $id)
+    /**
+     * @param int $id
+     * @return Record
+     */
+    public function deleteRecord(int $id): Record
     {
         $record = $this->em->getRepository(Record::class)->find($id);
 
@@ -81,7 +122,14 @@ class RecordsService
         return $record;
     }
 
-    protected function parseRecordRequest(Request $request, Record $record, $id=null)
+    /**
+     * @param Request $request
+     * @param Record $record
+     * @param int|null $id
+     *
+     * @return Record
+     */
+    protected function parseRecordRequest(Request $request, Record $record, int $id=null): Record
     {
         $date = \DateTime::createFromFormat("Y-m-d", $request->get('date'));
         $record->setDate($date);

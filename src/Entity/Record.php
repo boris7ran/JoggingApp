@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -37,28 +38,47 @@ class Record
      */
     private $user;
 
-    public function getId(): ?int
+    /**
+     * @return int
+     */
+    public function getId(): int
     {
         return $this->id;
     }
 
-    public function getDate(): ?\DateTimeInterface
+    /**
+     * @return DateTimeInterface
+     */
+    public function getDate(): DateTimeInterface
     {
         return $this->date;
     }
 
-    public function setDate(\DateTimeInterface $date): self
+    /**
+     * @param DateTimeInterface $date
+     *
+     * @return $this
+     */
+    public function setDate(DateTimeInterface $date): self
     {
         $this->date = $date;
 
         return $this;
     }
 
-    public function getDistance(): ?int
+    /**
+     * @return int
+     */
+    public function getDistance(): int
     {
         return $this->distance;
     }
 
+    /**
+     * @param int $distance
+     *
+     * @return $this
+     */
     public function setDistance(int $distance): self
     {
         $this->distance = $distance;
@@ -66,11 +86,19 @@ class Record
         return $this;
     }
 
-    public function getTime(): ?int
+    /**
+     * @return int
+     */
+    public function getTime(): int
     {
         return $this->time;
     }
 
+    /**
+     * @param int $time
+     *
+     * @return $this
+     */
     public function setTime(int $time): self
     {
         $this->time = $time;
@@ -78,12 +106,20 @@ class Record
         return $this;
     }
 
-    public function getUser(): ?User
+    /**
+     * @return User
+     */
+    public function getUser(): User
     {
         return $this->user;
     }
 
-    public function setUser(?User $user): self
+    /**
+     * @param User $user
+     * 
+     * @return $this
+     */
+    public function setUser(User $user): self
     {
         $this->user = $user;
 

@@ -38,7 +38,7 @@ class User implements UserInterface
     private $role;
 
     /**
-     * @var
+     * @var string[]
      */
     private $roles;
 
@@ -47,6 +47,9 @@ class User implements UserInterface
      */
     private $records;
 
+    /**
+     * User constructor.
+     */
     public function __construct()
     {
         $this->records = new ArrayCollection();
@@ -100,11 +103,19 @@ class User implements UserInterface
         return $this;
     }
 
-    public function getRole(): ?string
+    /**
+     * @return string
+     */
+    public function getRole(): string
     {
         return $this->role;
     }
 
+    /**
+     * @param string $role
+     *
+     * @return $this
+     */
     public function setRole(string $role): self
     {
         $this->role = $role;
@@ -122,16 +133,23 @@ class User implements UserInterface
         // TODO: Implement getSalt() method.
     }
 
-    public function getRoles()
+    /**
+     * @return array
+     */
+    public function getRoles(): array
     {
         $roles = $this->roles;
-        // guarantee every user at least has ROLE_USER
         $roles[] = $this->role;
 
         return array_unique($roles);
     }
 
-    public function isEqualTo(UserInterface $user)
+    /**
+     * @param UserInterface $user
+     *
+     * @return bool
+     */
+    public function isEqualTo(UserInterface $user): bool
     {
         if (!$user instanceof User) {
             return false;
@@ -149,13 +167,18 @@ class User implements UserInterface
     }
 
     /**
-     * @return Collection|Record[]
+     * @return Collection
      */
     public function getRecords(): Collection
     {
         return $this->records;
     }
 
+    /**
+     * @param Record $record
+     *
+     * @return $this
+     */
     public function addRecord(Record $record): self
     {
         if (!$this->records->contains($record)) {
@@ -166,11 +189,16 @@ class User implements UserInterface
         return $this;
     }
 
+    /**
+     * @param Record $record
+     *
+     * @return $this
+     */
     public function removeRecord(Record $record): self
     {
         if ($this->records->contains($record)) {
             $this->records->removeElement($record);
-            // set the owning side to null (unless already changed)
+
             if ($record->getUser() === $this) {
                 $record->setUser(null);
             }

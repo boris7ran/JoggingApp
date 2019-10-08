@@ -3,8 +3,10 @@
 namespace App\Repository;
 
 use App\Entity\User;
+use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Persistence\ManagerRegistry;
+use Doctrine\ORM\NonUniqueResultException;
 use Symfony\Component\DependencyInjection\Tests\Fixtures\includes\HotPath\P1;
 
 /**
@@ -15,48 +17,31 @@ use Symfony\Component\DependencyInjection\Tests\Fixtures\includes\HotPath\P1;
  */
 class UserRepository extends ServiceEntityRepository
 {
+    /**
+     * UserRepository constructor.
+     * @param ManagerRegistry $registry
+     */
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, User::class);
     }
 
-    // /**
-    //  * @return User[] Returns an array of User objects
-    //  */
-    /*
-    public function findByExampleField($value)
-    {
-        return $this->createQueryBuilder('u')
-            ->andWhere('u.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('u.id', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-    */
-
-    /*
-    public function findOneBySomeField($value): ?User
-    {
-        return $this->createQueryBuilder('u')
-            ->andWhere('u.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
-    }
-    */
-
-    public function getWithRecords($id, $startDate = null, $endDate =  null)
+    /**
+     * @param int $id
+     * @param DateTime|null $startDate
+     * @param DateTime|null $endDate
+     * @return User|null
+     *
+     * @throws NonUniqueResultException
+     */
+    public function getWithRecords(int $id, $startDate = null, $endDate =  null): ?User
     {
         if (!$endDate) {
-            $endDate =  \DateTime::createFromFormat("Y-m-d", '3000-1-1');
+            $endDate =  DateTime::createFromFormat("Y-m-d", '3000-1-1');
         }
 
         if (!$startDate) {
-            $startDate = \DateTime::createFromFormat("Y-m-d", '1900-1-1');
+            $startDate = DateTime::createFromFormat("Y-m-d", '1900-1-1');
         }
 
         if ($startDate) {

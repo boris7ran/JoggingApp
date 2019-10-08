@@ -20,13 +20,24 @@ class AuthService
      */
     private $em;
 
+    /**
+     * AuthService constructor.
+     * @param ValidatorInterface $validator
+     * @param EntityManagerInterface $em
+     */
     public function __construct(ValidatorInterface $validator, EntityManagerInterface $em)
     {
         $this->validator = $validator;
         $this->em = $em;
     }
 
-    public function storeUser(Request $request, UserPasswordEncoderInterface $passwordEncoder)
+    /**
+     * @param Request $request
+     * @param UserPasswordEncoderInterface $passwordEncoder
+     *
+     * @return User|Response
+     */
+    public function storeUser(Request $request, UserPasswordEncoderInterface $passwordEncoder): User
     {
         $user = new User();
         $user->setUsername($request->get('name'));

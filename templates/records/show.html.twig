@@ -12,7 +12,7 @@
                     {% if user.getRole != 'ROLE_MANAGER' %}
                         <option value="ROLE_MANAGER">Manager</option>
                     {% endif %}
-                    {% if is_granted('ROLE_ADMIN') %}
+                    {% if is_granted('ROLE_ADMIN') and user.getRole != 'ROLE_ADMIN' %}
                         <option value="ROLE_ADMIN">Administator</option>
                     {% endif %}
                 </select>
@@ -38,8 +38,6 @@
             </div>
         </form>
 
-
-
         <table class="table table-stripped table-bordered table-hover ml-1 mt-3" style="width: 70%">
             <thead class="thead-dark">
             <tr>
@@ -58,7 +56,7 @@
                     <td>{{ record.getDate.format('d-m-Y') }}</td>
                     <td>{{ record.distance }} km</td>
                     <td>{{ record.time }} min</td>
-                    <td>{{ record.distance/record.time }}</td>
+                    <td>{{ (record.distance/record.time*60)|round(3) }} km/h</td>
                     <td class="btn-group">
                         <button class="btn btn-secondary"><a href="{{ path('delete_record', {'id': record.getId}) }}" style="color: white">Delete</a></button>
                         <button class="btn btn-secondary"><a href="{{ path('edit_record', {'id': record.getId}) }}" style="color: white">Edit</a></button>
@@ -66,6 +64,7 @@
                 </tr>
             {% endfor %}
         </table>
+
     {% endif %}
 
     <form method="POST" action="{{ path('store_record', {'id': user.getId}) }}"  class="pt-5">
