@@ -20,16 +20,27 @@ class RecordsService
         $this->user = $tokenStorage->getToken()->getUser();
     }
 
-    public function getUserRecords($id = null)
+    public function getUserRecords($id = null, $startDate = null, $endDate = null)
     {
+        if ($startDate) {
+            $startDate = \DateTime::createFromFormat("Y-m-d", $startDate);
+        }
+
+        if ($endDate) {
+            $endDate = \DateTime::createFromFormat("Y-m-d", $endDate);
+        }
+
         if (!$id) {
             $user = $this->user;
         } else {
-            $user = $this->em->getRepository(User::class)->find($id);
+            $user = $this->em->getRepository(User::class)->getWithRecords($id, $startDate, $endDate);
+            if (!$user) {
+                $user = $this->em->getRepository(User::class)->find($id);
+            }
         }
 
         if (!$user) {
-            throw new Exception('No record found with id ' . $id);
+            throw new Exception('No user found with id ' . $id);
         }
 
         return $user;

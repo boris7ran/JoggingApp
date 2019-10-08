@@ -47,4 +47,15 @@ class RecordRepository extends ServiceEntityRepository
         ;
     }
     */
+
+    public function filterByDate($id, $startDate)
+    {
+        return $this->createQueryBuilder('r')
+            ->leftJoin('r.user', 'u')
+            ->addSelect('u')
+            ->andWhere('r.date > :startdate AND r.user = :id')
+            ->setParameters(['startdate' => $startDate, 'id' => $id])
+            ->getQuery()
+            ->getArrayResult();
+    }
 }

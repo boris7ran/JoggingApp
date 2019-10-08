@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Persistence\ManagerRegistry;
+use Symfony\Component\DependencyInjection\Tests\Fixtures\includes\HotPath\P1;
 
 /**
  * @method User|null find($id, $lockMode = null, $lockVersion = null)
@@ -47,4 +48,33 @@ class UserRepository extends ServiceEntityRepository
         ;
     }
     */
+
+    public function getWithRecords($id, $startDate = null, $endDate =  null)
+    {
+        if (!$endDate) {
+            $endDate =  \DateTime::createFromFormat("Y-m-d", '3000-1-1');
+        }
+
+        if (!$startDate) {
+            $startDate = \DateTime::createFromFormat("Y-m-d", '1900-1-1');
+        }
+
+        if ($startDate) {
+            return $this->createQueryBuilder('u')
+                ->leftJoin('u.records', 'r')
+                ->addSelect('r')
+                ->andWhere('u.id = :id AND r.date >= :startdate AND r.date < :enddate')
+                ->setParameters(['id' => $id, 'startdate' => $startDate, 'enddate' => $endDate])
+                ->getQuery()
+                ->getOneOrNullResult();
+        } else {
+            $this->createQueryBuilder('u')
+                ->leftJoin('u.records', 'r')
+                ->addSelect('r')
+                ->andWhere('u.id = :id')
+                ->setParameters(['id' => $id])
+                ->getQuery()
+                ->getOneOrNullResult();
+        }
+    }
 }

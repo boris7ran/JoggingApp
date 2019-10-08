@@ -15,9 +15,11 @@ class RecordController extends AbstractController
         $this->recordsService = $recordsService;
     }
 
-    public function show($id)
+    public function show($id, Request $request)
     {
-        $user = $this->recordsService->getUserRecords($id);
+        $startDate = $request->get('startDate');
+        $endDate = $request->get('endDate');
+        $user = $this->recordsService->getUserRecords($id, $startDate, $endDate);
 
         return $this->render('records/show.html.twig', ['user' => $user]);
     }
