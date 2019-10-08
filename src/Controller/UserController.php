@@ -2,57 +2,34 @@
 
 namespace App\Controller;
 
-
-use App\Entity\User;
+use App\Services\UsersService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class UserController extends AbstractController
 {
     /**
-     * @var ValidatorInterface
+     * @var UsersService
      */
-    private $validator;
+    private $usersService;
 
     public function __construct(
-        ValidatorInterface $validator
+        UsersService $usersService
     ) {
-        $this->validator = $validator;
+        $this->usersService = $usersService;
     }
 
     public function index()
     {
-        $entityManager = $this->getDoctrine()->getManager();
-
-        if ($this->getUser()->getRole() === 'ROLE_ADMIN') {
-            $users = $entityManager->getRepository(User::class)->findAll();
-        } else {
-            $users = $entityManager->getRepository(User::class)->findBy(['role' => 'ROLE_USER']);
-        }
+        $users = $this->usersService->getUsers();
 
         return $this->render('users/index.html.twig', ['users' => $users]);
     }
 
     public function upgrade(Request $request, $id)
     {
-        $entityManager = $this->getDoctrine()->getManager();
-
-        $user = $entityManager->getRepository(User::class)->find($id);
-
-        $user->setRole($request->get('role'));
-
-        $errors = $this->validator->validate($user);
-
-        if (count($errors) > 0) {
-            $errorsString = (string) $errors;
-
-            return new Response($errorsString);
-        }
-
-        $entityManager->persist($user);
-        $entityManager->flush();
+        $user = $this->usersService->upgradeUser($request, $id);
 
         return $this->redirectToRoute('show_records', ['id' => $user->getId()]);
     }

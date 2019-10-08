@@ -2,24 +2,23 @@
 
 namespace App\Controller;
 
-use App\Entity\User;
+use App\Services\AuthService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class RegisterController extends AbstractController
 {
     /**
-     * @var ValidatorInterface
+     * @var AuthService
      */
-    private $validator;
+    private $authService;
 
-    public function __construct(
-        ValidatorInterface $validator
-    ) {
-        $this->validator = $validator;
+    public function __construct(AuthService $authService)
+    {
+        $this->authService = $authService;
     }
 
     /**
@@ -34,36 +33,11 @@ class RegisterController extends AbstractController
      * @param Request $request
      * @param UserPasswordEncoderInterface $passwordEncoder
      *
-     * @return Response
+     * @return RedirectResponse
      */
-    public function store(Request $request, UserPasswordEncoderInterface $passwordEncoder): Response
+    public function store(Request $request, UserPasswordEncoderInterface $passwordEncoder)
     {
-        $entityManager = $this->getDoctrine()->getManager();
-
-        $user = new User();
-        $user->setUsername($request->get('name'));
-        $user->setPassword($request->get('password'));
-
-        if ($entityManager->getRepository(User::class)->findBy(['role' => 'ROLE_ADMIN'])) {
-            $user->setRole("ROLE_USER");
-        } else {
-            $user->setRole("ROLE_ADMIN");
-        }
-
-        $password = $passwordEncoder->encodePassword($user, $user->getPassword());
-        $user->setPassword($password);
-
-        $errors = $this->validator->validate($user);
-
-        if (count($errors) > 0) {
-            $errorsString = (string) $errors;
-
-            return new Response($errorsString);
-        }
-
-        $entityManager->persist($user);
-
-        $entityManager->flush();
+        $this->authService->storeUser($request, $passwordEncoder);
 
         return $this->redirectToRoute('login_user');
     }

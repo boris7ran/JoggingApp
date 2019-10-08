@@ -25,3 +25,14 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+    App\Services\RecordsService:
+        arguments:
+            $em: '@doctrine.orm.default_entity_manager'
+
+    App\Services\UsersService:
+        arguments:
+            $em: '@doctrine.orm.default_entity_manager'
+
+    App\Services\AuthService:
+        arguments:
+            $em: '@doctrine.orm.default_entity_manager'
