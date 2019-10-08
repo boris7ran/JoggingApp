@@ -185,7 +185,8 @@ class User implements UserInterface
     public static function loadValidatorMetadata(ClassMetadata $metadata)
     {
         $metadata->addConstraint(new UniqueEntity([
-            'fields' => 'username'
+            'fields' => 'username',
+            'groups' => ['registration']
         ]));
 
         $metadata->addPropertyConstraint('role', new CheckRole());
