@@ -97,7 +97,7 @@ class LoginFormAuth extends AbstractFormLoginAuthenticator
         $user = $this->tokenStorage->getToken()->getUser();
 
         return new RedirectResponse(
-            $this->router->generate('show_records', ['id' => $user->getId()])
+            $this->router->generate('my_records')
         );
     }
 
