@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Validator\Constraints\CheckRole;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -99,16 +100,6 @@ class User implements UserInterface
         return $this;
     }
 
-    /**
-     * @param ClassMetadata $metadata
-     */
-    public static function loadValidatorMetadata(ClassMetadata $metadata)
-    {
-        $metadata->addConstraint(new UniqueEntity([
-            'fields' => 'username'
-        ]));
-    }
-
     public function getRole(): ?string
     {
         return $this->role;
@@ -169,7 +160,7 @@ class User implements UserInterface
     {
         if (!$this->records->contains($record)) {
             $this->records[] = $record;
-            $record->setUserId($this);
+            $record->setUser($this);
         }
 
         return $this;
@@ -180,11 +171,23 @@ class User implements UserInterface
         if ($this->records->contains($record)) {
             $this->records->removeElement($record);
             // set the owning side to null (unless already changed)
-            if ($record->getUserId() === $this) {
-                $record->setUserId(null);
+            if ($record->getUser() === $this) {
+                $record->setUser(null);
             }
         }
 
         return $this;
+    }
+
+    /**
+     * @param ClassMetadata $metadata
+     */
+    public static function loadValidatorMetadata(ClassMetadata $metadata)
+    {
+        $metadata->addConstraint(new UniqueEntity([
+            'fields' => 'username'
+        ]));
+
+        $metadata->addPropertyConstraint('role', new CheckRole());
     }
 }
