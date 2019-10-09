@@ -46,11 +46,11 @@ class RecordRepository extends ServiceEntityRepository
     /**
      * @param int $id
      *
-     * @return mixed
+     * @return Record[]|null
      *
      * @throws NonUniqueResultException
      */
-    public function getFirstJogg(int $id): ?Record
+    public function getFirstJogg(int $id): ?array
     {
         return $this->createQueryBuilder('r')
             ->select('min(r.date)')
@@ -60,7 +60,12 @@ class RecordRepository extends ServiceEntityRepository
             ->getOneOrNullResult();
     }
 
-    public function getLastJogg($id)
+    /**
+     * @param int $id
+     * @return Record[]|null
+     * @throws NonUniqueResultException
+     */
+    public function getLastJogg(int $id): ?array
     {
         return $this->createQueryBuilder('r')
             ->select('max(r.date)')
