@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Entity\Record;
 use App\Entity\User;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Component\HttpFoundation\Request;
@@ -43,11 +44,11 @@ class RecordsService
     public function getUserRecords(int $id = null, string $startDate = null, string $endDate = null): User
     {
         if ($startDate) {
-            $startDate = \DateTime::createFromFormat("Y-m-d", $startDate);
+            $startDate = DateTime::createFromFormat("Y-m-d", $startDate);
         }
 
         if ($endDate) {
-            $endDate = \DateTime::createFromFormat("Y-m-d", $endDate);
+            $endDate = DateTime::createFromFormat("Y-m-d", $endDate);
         }
 
         if (!$id) {
@@ -131,7 +132,7 @@ class RecordsService
      */
     protected function parseRecordRequest(Request $request, Record $record, int $id=null): Record
     {
-        $date = \DateTime::createFromFormat("Y-m-d", $request->get('date'));
+        $date = DateTime::createFromFormat("Y-m-d", $request->get('date'));
         $record->setDate($date);
         $record->setDistance($request->get('distance'));
         $record->setTime($request->get('time'));
@@ -145,5 +146,54 @@ class RecordsService
         $this->em->flush();
 
         return $record;
+    }
+
+    public function makeReports(int $id)
+    {
+        $firstJogg = $this->em->getRepository(Record::class)->getFirstJogg($id)[1];
+        $lastJogg = $this->em->getRepository(Record::class)->getLastJogg($id)[1];
+        $firstJogg = DateTime::createFromFormat("Y-m-d", $firstJogg);
+        $lastJogg = DateTime::createFromFormat("Y-m-d", $lastJogg);
+
+        if (!$firstJogg) {
+            return [];
+        }
+        $firstDayWeek = DateService::getStartDate($firstJogg);
+
+        $reports = [];
+
+        for ($i = $firstDayWeek; $i < $lastJogg; $i->modify('+7 days')) {
+            $lastDayOfCurrentWeek = DateService::getEndDate($i);
+
+            $records = $this->em->getRepository(Record::class)
+                ->getFilteredRecords($id, $i, $lastDayOfCurrentWeek);
+
+            if ($records) {
+                $report = $this->calculateAverage($records);
+                $report["week"] = $i->format("W");
+                $reports[] = $report;
+            }
+        }
+
+        return $reports;
+    }
+
+    public function calculateAverage($records)
+    {
+        $averageDistance = 0;
+        $averageTime = 0;
+
+        foreach ($records as $record) {
+            $averageTime += $record['time'];
+            $averageDistance += $record['distance'];
+        }
+
+        $averageTime = $averageTime/count($records);
+        $averageDistance = $averageDistance/count($records);
+
+        return [
+            'averageDistance' => $averageDistance,
+            "averageTime" => $averageTime
+        ];
     }
 }

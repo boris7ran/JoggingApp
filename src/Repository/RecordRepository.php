@@ -42,4 +42,36 @@ class RecordRepository extends ServiceEntityRepository
             ->getQuery()
             ->getArrayResult();
     }
+
+    public function getFirstJogg($id)
+    {
+        return $this->createQueryBuilder('r')
+            ->select('min(r.date)')
+            ->where('r.user = :id')
+            ->setParameter('id', $id)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
+    public function getLastJogg($id)
+    {
+        return $this->createQueryBuilder('r')
+            ->select('max(r.date)')
+            ->where('r.user = :id')
+            ->setParameter('id', $id)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
+    public function getFilteredRecords($id, $startDate, $endDate)
+    {
+        $partDate = DateTime::createFromFormat('Y-m-d', $startDate->format('Y-m-d'));
+        $partDate->modify('-1 days');
+
+        return $this->createQueryBuilder('r')
+            ->andWhere('r.user = :id AND :endDate >= r.date AND :startDate < r.date')
+            ->setParameters(['id' => $id, 'startDate' => $partDate, 'endDate' => $endDate])
+            ->getQuery()
+            ->getArrayResult();
+    }
 }
