@@ -9,11 +9,12 @@
         <form method="post" action="{{ path('edit_role', {'id': user.getId }) }}">
             <div class="row ml-1">
                 <select class="custom-select col-sm-2" name="role" id="role">
+                    <option value="ROLE_USER">User</option>
                     {% if user.getRole != 'ROLE_MANAGER' %}
                         <option value="ROLE_MANAGER">Manager</option>
                     {% endif %}
                     {% if is_granted('ROLE_ADMIN') and user.getRole != 'ROLE_ADMIN' %}
-                        <option value="ROLE_ADMIN">Administator</option>
+                        <option value="ROLE_ADMIN">Administrator</option>
                     {% endif %}
                 </select>
 
@@ -34,7 +35,9 @@
                     <label for="endDate" class="form-control col-sm-4">To: </label>
                     <input type="date" class="form-control col-sm-8" id="endDate" name="endDate">
                 </div>
-                <button type="submit" class="col-sm-2">Filter by Date</button>
+                <div class="col-sm-4">
+                    <button type="submit" class="btn btn-secondary col-sm-2">Filter</button>
+                </div>
             </div>
         </form>
 
@@ -94,7 +97,7 @@
             <tr>
                 <th>Week</th>
                 <th>Average Time</th>
-                <th>Average Distance</th>>
+                <th>Average Distance</th>
             </tr>
             </thead>
 

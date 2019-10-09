@@ -28,7 +28,8 @@ class CheckRoleValidator extends ConstraintValidator
         }
 
         if (!$this->checker->isGranted('ROLE_ADMIN')) {
-            if (!($this->checker->isGranted('ROLE_MANAGER') && $value !== 'ROLE_ADMIN')){
+            if (!($this->checker->isGranted('ROLE_MANAGER')
+                && ($value !== 'ROLE_ADMIN' && $value !== 'ROLE_USER'))){
                 $this->context->buildViolation($constraint->message)
                     ->setParameter('{{ string }}', $value)
                     ->addViolation();
