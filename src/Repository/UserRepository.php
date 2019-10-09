@@ -7,7 +7,6 @@ use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\ORM\NonUniqueResultException;
-use Symfony\Component\DependencyInjection\Tests\Fixtures\includes\HotPath\P1;
 
 /**
  * @method User|null find($id, $lockMode = null, $lockVersion = null)
@@ -44,22 +43,12 @@ class UserRepository extends ServiceEntityRepository
             $startDate = DateTime::createFromFormat("Y-m-d", '1900-1-1');
         }
 
-        if ($startDate) {
-            return $this->createQueryBuilder('u')
-                ->leftJoin('u.records', 'r')
-                ->addSelect('r')
-                ->andWhere('u.id = :id AND r.date >= :startdate AND r.date < :enddate')
-                ->setParameters(['id' => $id, 'startdate' => $startDate, 'enddate' => $endDate])
-                ->getQuery()
-                ->getOneOrNullResult();
-        } else {
-            $this->createQueryBuilder('u')
-                ->leftJoin('u.records', 'r')
-                ->addSelect('r')
-                ->andWhere('u.id = :id')
-                ->setParameters(['id' => $id])
-                ->getQuery()
-                ->getOneOrNullResult();
-        }
+        return $this->createQueryBuilder('u')
+            ->leftJoin('u.records', 'r')
+            ->addSelect('r')
+            ->andWhere('u.id = :id AND r.date >= :startDate AND r.date < :endDate')
+            ->setParameters(['id' => $id, 'startDate' => $startDate, 'endDate' => $endDate])
+            ->getQuery()
+            ->getOneOrNullResult();
     }
 }
