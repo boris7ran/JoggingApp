@@ -42,6 +42,6 @@ class UserController extends AbstractController
     {
         $user = $this->usersService->upgradeUser($request, $id);
 
-        return $this->redirectToRoute('show_records', ['id' => $user->getId()]);
+        return $this->redirectToRoute('all_users');
     }
 }

@@ -39,6 +39,7 @@ class RecordController extends AbstractController
         $endDate = $request->get('endDate');
         $user = $this->recordsService->getUserRecords($id, $startDate, $endDate);
         $reports = $this->recordsService->makeReports($id);
+        $this->denyAccessUnlessGranted('view', $user);
 
         return $this->render('records/show.html.twig', ['user' => $user, 'reports' => $reports]);
     }
