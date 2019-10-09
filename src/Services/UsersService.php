@@ -55,9 +55,9 @@ class UsersService
      * @param Request $request
      * @param int $id
      *
-     * @return User
+     * @return object
      */
-    public function upgradeUser(Request $request, int $id): User
+    public function upgradeUser(Request $request, int $id): object
     {
         $user = $this->em->getRepository(User::class)->find($id);
 

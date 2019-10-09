@@ -37,7 +37,7 @@ class AuthService
      *
      * @return User|Response
      */
-    public function storeUser(Request $request, UserPasswordEncoderInterface $passwordEncoder): User
+    public function storeUser(Request $request, UserPasswordEncoderInterface $passwordEncoder)
     {
         $user = new User();
         $user->setUsername($request->get('name'));
@@ -57,7 +57,7 @@ class AuthService
         if (count($errors) > 0) {
             $errorsString = (string) $errors;
 
-            return new Response($errorsString);
+            throw new \Error('This user is not valid!');
         }
 
         $this->em->persist($user);

@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Services\DateService;
 use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -107,9 +108,9 @@ class Record
     }
 
     /**
-     * @return User
+     * @return User|null
      */
-    public function getUser(): User
+    public function getUser(): ?User
     {
         return $this->user;
     }

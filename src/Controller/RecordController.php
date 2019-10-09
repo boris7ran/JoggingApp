@@ -51,8 +51,9 @@ class RecordController extends AbstractController
     public function myRecords(): Response
     {
         $user = $this->recordsService->getUserRecords();
+        $reports = $this->recordsService->makeReports($user->getId());
 
-        return $this->render('records/show.html.twig', ['user' => $user]);
+        return $this->render('records/show.html.twig', ['user' => $user, 'reports' => $reports]);
     }
 
     /**
