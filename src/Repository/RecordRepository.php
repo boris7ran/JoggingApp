@@ -3,10 +3,10 @@
 namespace App\Repository;
 
 use App\Entity\Record;
-use Cassandra\Date;
 use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Persistence\ManagerRegistry;
+use Doctrine\ORM\NonUniqueResultException;
 
 /**
  * @method Record|null find($id, $lockMode = null, $lockVersion = null)
@@ -43,7 +43,14 @@ class RecordRepository extends ServiceEntityRepository
             ->getArrayResult();
     }
 
-    public function getFirstJogg($id)
+    /**
+     * @param int $id
+     *
+     * @return mixed
+     *
+     * @throws NonUniqueResultException
+     */
+    public function getFirstJogg(int $id): ?Record
     {
         return $this->createQueryBuilder('r')
             ->select('min(r.date)')
@@ -63,7 +70,14 @@ class RecordRepository extends ServiceEntityRepository
             ->getOneOrNullResult();
     }
 
-    public function getFilteredRecords($id, $startDate, $endDate)
+    /**
+     * @param int $id
+     * @param DateTime $startDate
+     * @param DateTime $endDate
+     *
+     * @return Record[]
+     */
+    public function getFilteredRecords(int $id, DateTime $startDate, DateTime $endDate)
     {
         $partDate = DateTime::createFromFormat('Y-m-d', $startDate->format('Y-m-d'));
         $partDate->modify('-1 days');

@@ -2,7 +2,6 @@
 
 namespace App\Entity;
 
-use App\Services\DateService;
 use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 

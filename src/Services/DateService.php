@@ -9,7 +9,7 @@ class DateService
 {
     /**
      * @param DateTime $date
-     * 
+     *
      * @return int
      */
     public static function getWeek(DateTime $date): int

@@ -111,6 +111,7 @@ class RecordsService
 
     /**
      * @param int $id
+     *
      * @return Record
      */
     public function deleteRecord(int $id): Record
@@ -148,6 +149,13 @@ class RecordsService
         return $record;
     }
 
+    /**
+     * @param int $id
+     *
+     * @return array
+     *
+     * @throws Exception
+     */
     public function makeReports(int $id)
     {
         $firstJogg = $this->em->getRepository(Record::class)->getFirstJogg($id)[1];
@@ -178,7 +186,12 @@ class RecordsService
         return $reports;
     }
 
-    public function calculateAverage($records)
+    /**
+     * @param Record[] $records
+     *
+     * @return array
+     */
+    public function calculateAverage(array $records): array
     {
         $averageDistance = 0;
         $averageTime = 0;
