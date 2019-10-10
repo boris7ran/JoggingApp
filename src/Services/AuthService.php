@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
+use Error;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
@@ -39,29 +40,25 @@ class AuthService
      */
     public function storeUser(Request $request, UserPasswordEncoderInterface $passwordEncoder)
     {
-        $user = new User();
-        $user->setUsername($request->get('name'));
-        $user->setPassword($request->get('password'));
+        $password = $request->get('password');
+        $username = $request->get('name');
 
-        if ($this->em->getRepository(User::class)->findBy(['role' => 'ROLE_ADMIN'])) {
-            $user->setRole("ROLE_USER");
-        } else {
-            $user->setRole("ROLE_ADMIN");
-        }
 
-        $password = $passwordEncoder->encodePassword($user, $user->getPassword());
+        $roles[] = "ROLE_USER";
+
+        $user = new User($password, $username, $roles);
+
+        $password = $passwordEncoder->encodePassword($user, $password);
+
         $user->setPassword($password);
 
         $errors = $this->validator->validate($user, null, ['registration']);
 
         if (count($errors) > 0) {
-            $errorsString = (string) $errors;
-
-            throw new \Error('This user is not valid!');
+            throw new Error('This user is not valid!');
         }
 
         $this->em->persist($user);
-
         $this->em->flush();
 
         return $user;

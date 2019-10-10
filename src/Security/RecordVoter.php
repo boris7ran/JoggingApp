@@ -76,11 +76,12 @@ class RecordVoter extends Voter
      */
     private function canEdit(User $owner, User $user): bool
     {
-        if ($user->getRole() === 'ROLE_ADMIN') {
+        if (in_array('ROLE_ADMIN', $user->getRoles())) {
             return true;
         }
 
-        if (($user->getRole() === 'ROLE_MANAGER') && ($owner->getRole() === 'ROLE_USER')) {
+        if ((in_array('ROLE_MANAGER', $user->getRoles()))
+            && (in_array('ROLE_USER', $owner->getRoles()))) {
             return true;
         }
 

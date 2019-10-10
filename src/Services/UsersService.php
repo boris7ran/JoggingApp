@@ -42,10 +42,10 @@ class UsersService
      */
     public function getUsers(): array
     {
-        if ($this->user->getRole() === 'ROLE_ADMIN') {
+        if (in_array('ROLE_ADMIN', $this->user->getRoles())) {
             $users = $this->em->getRepository(User::class)->findAll();
         } else {
-            $users = $this->em->getRepository(User::class)->findBy(['role' => 'ROLE_USER']);
+            $users = $this->em->getRepository(User::class)->findBy(['roles' => ['ROLE_USER']]);
         }
 
         return $users;
@@ -61,7 +61,7 @@ class UsersService
     {
         $user = $this->em->getRepository(User::class)->find($id);
 
-        $user->setRole($request->get('role'));
+        $user->setRoles([$request->get('role')]);
 
         $errors = $this->validator->validate($user);
 

@@ -10,10 +10,10 @@
             <div class="row ml-1">
                 <select class="custom-select col-sm-2" name="role" id="role">
                     <option value="ROLE_USER">User</option>
-                    {% if user.getRole != 'ROLE_MANAGER' %}
+                    {% if 'ROLE_MANAGER' not in user.getRoles %}
                         <option value="ROLE_MANAGER">Manager</option>
                     {% endif %}
-                    {% if is_granted('ROLE_ADMIN') and user.getRole != 'ROLE_ADMIN' %}
+                    {% if is_granted('ROLE_ADMIN') and 'ROLE_ADMIN' not in user.getRoles %}
                         <option value="ROLE_ADMIN">Administrator</option>
                     {% endif %}
                 </select>

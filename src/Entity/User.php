@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Validator\Constraints\CheckRole;
+use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -23,22 +24,17 @@ class User implements UserInterface
     private $id;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string")
      */
     private $username;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string")
      */
     private $password;
 
     /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $role;
-
-    /**
-     * @var string[]
+     * @ORM\Column(type="simple_array")
      */
     private $roles;
 
@@ -49,10 +45,17 @@ class User implements UserInterface
 
     /**
      * User constructor.
+     * @param string $password
+     * @param string $username
+     * @param array $roles
      */
-    public function __construct()
+    public function __construct(string $password, string $username, array $roles)
     {
         $this->records = new ArrayCollection();
+
+        $this->password = $password;
+        $this->username = $username;
+        $this->roles = $roles;
     }
 
     /**
@@ -72,18 +75,6 @@ class User implements UserInterface
     }
 
     /**
-     * @param string $username
-     *
-     * @return $this
-     */
-    public function setUsername(string $username): self
-    {
-        $this->username = $username;
-
-        return $this;
-    }
-
-    /**
      * @return string
      */
     public function getPassword(): string
@@ -93,34 +84,47 @@ class User implements UserInterface
 
     /**
      * @param string $password
-     *
-     * @return $this
      */
-    public function setPassword(string $password): self
+    public function setPassword(string $password)
     {
         $this->password = $password;
-
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getRole(): string
-    {
-        return $this->role;
     }
 
     /**
      * @param string $role
-     *
-     * @return $this
      */
-    public function setRole(string $role): self
+    public function addRole(string $role)
     {
-        $this->role = $role;
+        if (!in_array($role, $this->roles)){
+            $this->roles[] = $role;
+        }
+    }
 
-        return $this;
+    /**
+     * @param string $role
+     */
+    public function removeRole(string $role)
+    {
+        $index = array_search($role, $this->roles);
+        if ($index) {
+            array_splice($this->roles, $index, 1);
+        }
+    }
+
+    /**
+     * @param array $roles
+     */
+    public function setRoles(array $roles)
+    {
+        $this->roles = $roles;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getRoles(): array
+    {
+        return $this->roles;
     }
 
     public function eraseCredentials()
@@ -134,17 +138,6 @@ class User implements UserInterface
     }
 
     /**
-     * @return array
-     */
-    public function getRoles(): array
-    {
-        $roles = $this->roles;
-        $roles[] = $this->role;
-
-        return array_unique($roles);
-    }
-
-    /**
      * @param UserInterface $user
      *
      * @return bool
@@ -155,11 +148,7 @@ class User implements UserInterface
             return false;
         }
 
-        if ($this->password !== $user->getPassword()) {
-            return false;
-        }
-
-        if ($this->username !== $user->getUsername()) {
+        if ($user->getId() !== $this->id) {
             return false;
         }
 
@@ -175,26 +164,23 @@ class User implements UserInterface
     }
 
     /**
-     * @param Record $record
+     * @param DateTimeInterface $date
+     * @param int $time
+     * @param int $distance
      *
-     * @return $this
+     * @return Record
      */
-    public function addRecord(Record $record): self
+    public function addRecord(DateTimeInterface $date, int $time, int $distance): Record
     {
-        if (!$this->records->contains($record)) {
-            $this->records[] = $record;
-            $record->setUser($this);
-        }
+        $record = new Record($date, $time, $distance, $this);
 
-        return $this;
+        return $record;
     }
 
     /**
      * @param Record $record
-     *
-     * @return $this
      */
-    public function removeRecord(Record $record): self
+    public function removeRecord(Record $record)
     {
         if ($this->records->contains($record)) {
             $this->records->removeElement($record);
@@ -203,8 +189,6 @@ class User implements UserInterface
                 $record->setUser(null);
             }
         }
-
-        return $this;
     }
 
     /**
@@ -217,6 +201,6 @@ class User implements UserInterface
             'groups' => ['registration']
         ]));
 
-        $metadata->addPropertyConstraint('role', new CheckRole());
+        $metadata->addPropertyConstraint('roles', new CheckRole());
     }
 }
