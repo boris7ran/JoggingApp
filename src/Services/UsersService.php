@@ -59,7 +59,7 @@ class UsersService
      */
     public function upgradeUser(Request $request, int $id): object
     {
-        $user = $this->em->getRepository(User::class)->find($id);
+        $user = $this->em->getRepository(User::class)->ofId($id);
 
         $user->setRoles([$request->get('role')]);
 

@@ -43,7 +43,6 @@ class AuthService
         $password = $request->get('password');
         $username = $request->get('name');
 
-
         $roles[] = "ROLE_USER";
 
         $user = new User($password, $username, $roles);
@@ -58,8 +57,7 @@ class AuthService
             throw new Error('This user is not valid!');
         }
 
-        $this->em->persist($user);
-        $this->em->flush();
+        $this->em->getRepository(User::class)->add($user);
 
         return $user;
     }

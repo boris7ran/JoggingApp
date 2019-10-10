@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Entity\Record;
 use App\Entity\User;
+use App\Model\RepositoryFilter;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -54,7 +55,8 @@ class RecordsService
         if (!$id) {
             $user = $this->user;
         } else {
-            $user = $this->em->getRepository(User::class)->getWithRecords($id, $startDate, $endDate);
+            $filter = new RepositoryFilter($id, $startDate, $endDate);
+            $user = $this->em->getRepository(User::class)->filter($filter);
             if (!$user) {
                 $user = $this->em->getRepository(User::class)->find($id);
             }
@@ -70,16 +72,10 @@ class RecordsService
     /**
      * @param Request $request
      * @param int $id
-     *
-     * @return Record
      */
-    public function storeNewRecord(Request $request, int $id): Record
+    public function storeNewRecord(Request $request, int $id)
     {
-        $record = new Record();
-
-        $this->parseRecordRequest($request, $record, $id);
-
-        return $record;
+        $this->parseRecordRequest($request, null, $id);
     }
 
     /**
@@ -116,35 +112,35 @@ class RecordsService
      */
     public function deleteRecord(int $id): Record
     {
-        $record = $this->em->getRepository(Record::class)->find($id);
-
-        $this->em->remove($record);
-        $this->em->flush();
+        $record = $this->em->getRepository(Record::class)->ofId($id);
+        $this->em->getRepository(Record::class)->remove($record);
 
         return $record;
     }
 
     /**
      * @param Request $request
-     * @param Record $record
+     * @param Record|null $record
      * @param int|null $id
      *
-     * @return Record
+     * @return Record|null
      */
-    protected function parseRecordRequest(Request $request, Record $record, int $id=null): Record
+    protected function parseRecordRequest(Request $request, Record $record = null, int $id=null): ?Record
     {
         $date = DateTime::createFromFormat("Y-m-d", $request->get('date'));
-        $record->setDate($date);
-        $record->setDistance($request->get('distance'));
-        $record->setTime($request->get('time'));
+        $distance = $request->get('distance');
+        $time = $request->get('time');
 
-        if (!$record->getUser() && $id !== null) {
+        if (!$record && $id !== null) {
             $user = $this->em->getRepository(User::class)->find($id);
-            $record->setUser($user);
+            $record = new Record($date, $time, $distance, $user);
+        } else {
+            $record->setDate($date);
+            $record->setDistance($distance);
+            $record->setTime($time);
         }
 
-        $this->em->persist($record);
-        $this->em->flush();
+        $this->em->getRepository(Record::class)->add($record);
 
         return $record;
     }
@@ -156,10 +152,13 @@ class RecordsService
      *
      * @throws Exception
      */
-    public function makeReports(int $id)
+    public function makeReports(int $id): array
     {
-        $firstJogg = $this->em->getRepository(Record::class)->getFirstJogg($id)[1];
-        $lastJogg = $this->em->getRepository(Record::class)->getLastJogg($id)[1];
+        $filterFirstJogg = new RepositoryFilter($id, null, null, true);
+        $filterLastJogg = new RepositoryFilter($id, null, null, false, true);
+
+        $firstJogg = $this->em->getRepository(Record::class)->filter($filterFirstJogg)[1];
+        $lastJogg = $this->em->getRepository(Record::class)->filter($filterLastJogg)[1];
         $firstJogg = DateTime::createFromFormat("Y-m-d", $firstJogg);
         $lastJogg = DateTime::createFromFormat("Y-m-d", $lastJogg);
 
@@ -170,11 +169,13 @@ class RecordsService
 
         $reports = [];
 
+
         for ($i = $firstDayWeek; $i < $lastJogg; $i->modify('+7 days')) {
             $lastDayOfCurrentWeek = DateService::getEndDate($i);
+            $weekRecordsFilter = new RepositoryFilter($id, $i, $lastDayOfCurrentWeek);
 
             $records = $this->em->getRepository(Record::class)
-                ->getFilteredRecords($id, $i, $lastDayOfCurrentWeek);
+                ->filter($weekRecordsFilter);
 
             if ($records) {
                 $report = $this->calculateAverage($records);

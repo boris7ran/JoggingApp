@@ -3,18 +3,14 @@
 namespace App\Repository;
 
 use App\Entity\Record;
+use App\Model\RepositoryFilter;
+use App\Repository\Interfaces\RecordRepositoryInterface;
 use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\ORM\NonUniqueResultException;
 
-/**
- * @method Record|null find($id, $lockMode = null, $lockVersion = null)
- * @method Record|null findOneBy(array $criteria, array $orderBy = null)
- * @method Record[]    findAll()
- * @method Record[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
- */
-class RecordRepository extends ServiceEntityRepository
+class RecordRepository extends ServiceEntityRepository implements RecordRepositoryInterface
 {
     /**
      * RecordRepository constructor.
@@ -28,68 +24,86 @@ class RecordRepository extends ServiceEntityRepository
 
     /**
      * @param int $id
-     * @param DateTime $startDate
      *
-     * @return Record[]
-     */
-    public function filterByDate(int $id, $startDate): array
-    {
-        return $this->createQueryBuilder('r')
-            ->leftJoin('r.user', 'u')
-            ->addSelect('u')
-            ->andWhere('r.date > :startdate AND r.user = :id')
-            ->setParameters(['startdate' => $startDate, 'id' => $id])
-            ->getQuery()
-            ->getArrayResult();
-    }
-
-    /**
-     * @param int $id
-     *
-     * @return Record[]|null
+     * @return Record|null
      *
      * @throws NonUniqueResultException
      */
-    public function getFirstJogg(int $id): ?array
+    public function ofId(int $id): ?Record
     {
         return $this->createQueryBuilder('r')
-            ->select('min(r.date)')
-            ->where('r.user = :id')
+            ->where("r.id = :id")
             ->setParameter('id', $id)
             ->getQuery()
             ->getOneOrNullResult();
     }
 
-    /**
-     * @param int $id
-     * @return Record[]|null
-     * @throws NonUniqueResultException
-     */
-    public function getLastJogg(int $id): ?array
+    public function remove(Record $record)
     {
-        return $this->createQueryBuilder('r')
-            ->select('max(r.date)')
-            ->where('r.user = :id')
-            ->setParameter('id', $id)
-            ->getQuery()
-            ->getOneOrNullResult();
+        $this->getEntityManager()->remove($record);
+        $this->getEntityManager()->flush();
+    }
+
+    public function add(Record $record)
+    {
+        $this->getEntityManager()->persist($record);
+        $this->getEntityManager()->flush();
     }
 
     /**
-     * @param int $id
-     * @param DateTime $startDate
-     * @param DateTime $endDate
+     * @param RepositoryFilter $filter
      *
-     * @return Record[]
+     * @return Record[]|null
+     *
+     * @throws NonUniqueResultException
      */
-    public function getFilteredRecords(int $id, DateTime $startDate, DateTime $endDate)
+    public function filter(RepositoryFilter $filter): ?array
     {
-        $partDate = DateTime::createFromFormat('Y-m-d', $startDate->format('Y-m-d'));
+        $query = $this->createQueryBuilder('r');
+
+        if ($filter->isFirstJogg()) {
+            return $query->select('min(r.date)')
+                ->where('r.user = :id')
+                ->setParameter('id', $filter->getUserId())
+                ->getQuery()
+                ->getOneOrNullResult();
+        }
+        if ($filter->isLastJogg()) {
+            return $query->select('max(r.date)')
+                ->where('r.user = :id')
+                ->setParameter('id', $filter->getUserId())
+                ->getQuery()
+                ->getOneOrNullResult();
+        }
+
+        if (!$filter->getEndDate() && !$filter->getStartDate()) {
+            return $query->where('r.user = :id')
+                ->setParameters(['id' => $filter->getUserId()])
+                ->getQuery()
+                ->getArrayResult();
+
+        } elseif (!$filter->getStartDate()) {
+            return $query->andWhere('r.user = :id AND r.date < endDate')
+                ->setParameters(['id' => $filter->getUserId(), 'endDate' => $filter->getEndDate()])
+                ->getQuery()
+                ->getArrayResult();
+        } elseif (!$filter->getEndDate()) {
+            $partDate = DateTime::createFromFormat('Y-m-d', $filter->getStartDate()->format('Y-m-d'));
+            $partDate->modify('-1 days');
+
+            return $query->where('r.user = :id AND r.date >= :startDate')
+                ->setParameters(['id' => $filter->getUserId(), 'startDate' => $partDate])
+                ->getQuery()
+                ->getArrayResult();
+
+        }
+
+        $partDate = DateTime::createFromFormat('Y-m-d', $filter->getStartDate()->format('Y-m-d'));
         $partDate->modify('-1 days');
 
         return $this->createQueryBuilder('r')
             ->andWhere('r.user = :id AND :endDate >= r.date AND :startDate < r.date')
-            ->setParameters(['id' => $id, 'startDate' => $partDate, 'endDate' => $endDate])
+            ->setParameters(['id' => $filter->getUserId(), 'startDate' => $partDate, 'endDate' => $filter->getEndDate()])
             ->getQuery()
             ->getArrayResult();
     }

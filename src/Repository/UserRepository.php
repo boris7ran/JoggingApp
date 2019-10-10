@@ -3,18 +3,15 @@
 namespace App\Repository;
 
 use App\Entity\User;
-use DateTime;
+use App\Model\RepositoryFilter;
+use App\Repository\Interfaces\UserRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
 
-/**
- * @method User|null find($id, $lockMode = null, $lockVersion = null)
- * @method User|null findOneBy(array $criteria, array $orderBy = null)
- * @method User[]    findAll()
- * @method User[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
- */
-class UserRepository extends ServiceEntityRepository
+class UserRepository extends ServiceEntityRepository implements UserRepositoryInterface
 {
     /**
      * UserRepository constructor.
@@ -27,27 +24,83 @@ class UserRepository extends ServiceEntityRepository
 
     /**
      * @param int $id
-     * @param DateTime|null $startDate
-     * @param DateTime|null $endDate
+     *
      * @return User|null
      *
      * @throws NonUniqueResultException
      */
-    public function getWithRecords(int $id, $startDate = null, $endDate =  null): ?User
+    public function ofId(int $id): ?User
     {
-        if (!$endDate) {
-            $endDate =  DateTime::createFromFormat("Y-m-d", '3000-1-1');
-        }
-
-        if (!$startDate) {
-            $startDate = DateTime::createFromFormat("Y-m-d", '1900-1-1');
-        }
-
         return $this->createQueryBuilder('u')
+            ->where("u.id = :id")
+            ->setParameter('id', $id)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
+    /**
+     * @param User $user
+     *
+     * @throws ORMException
+     * @throws OptimisticLockException
+     */
+    public function remove(User $user)
+    {
+        $this->getEntityManager()->remove($user);
+        $this->getEntityManager()->flush();
+    }
+
+    /**
+     * @param User $user
+     *
+     * @throws ORMException
+     * @throws OptimisticLockException
+     */
+    public function add(User $user)
+    {
+        $this->getEntityManager()->persist($user);
+        $this->getEntityManager()->flush();
+    }
+
+    /**
+     * @param RepositoryFilter $filter
+     * @return User|null
+     *
+     * @throws NonUniqueResultException
+     */
+    public function filter(RepositoryFilter $filter): ?User
+    {
+        $query = $this->createQueryBuilder('u')
             ->leftJoin('u.records', 'r')
-            ->addSelect('r')
-            ->andWhere('u.id = :id AND r.date >= :startDate AND r.date < :endDate')
-            ->setParameters(['id' => $id, 'startDate' => $startDate, 'endDate' => $endDate])
+            ->addSelect('r');
+
+        if (!$filter->getStartDate() && !$filter->getEndDate()) {
+            return $query->andWhere('u.id = :id')
+                ->setParameter('id', $filter->getUserId())
+                ->getQuery()
+                ->getOneOrNullResult();
+        }
+
+        if (!$filter->getStartDate()) {
+            return $query->andWhere('u.id = :id AND r.date < :endDate')
+                ->setParameters(['id' => $filter->getUserId(),
+                    'endDate' => $filter->getEndDate()])
+                ->getQuery()
+                ->getOneOrNullResult();
+        }
+
+        if (!$filter->getEndDate()) {
+            return $query->andWhere('u.id = :id AND r.date > :startDate')
+                ->setParameters(['id' => $filter->getUserId(),
+                    'startDate' => $filter->getStartDate()])
+                ->getQuery()
+                ->getOneOrNullResult();
+        }
+
+        return $query->andWhere('u.id = :id AND r.date >= :startDate AND r.date < :endDate')
+            ->setParameters(['id' => $filter->getUserId(),
+                'startDate' => $filter->getStartDate(),
+                'endDate' => $filter->getEndDate()])
             ->getQuery()
             ->getOneOrNullResult();
     }

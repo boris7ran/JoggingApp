@@ -39,6 +39,21 @@ class Record
     private $user;
 
     /**
+     * Record constructor.
+     * @param DateTimeInterface $date
+     * @param int $time
+     * @param int $distance
+     * @param User $user
+     */
+    public function __construct(DateTimeInterface $date, int $time, int $distance, User $user)
+    {
+        $this->date = $date;
+        $this->time = $time;
+        $this->distance = $distance;
+        $this->user = $user;
+    }
+
+    /**
      * @return int
      */
     public function getId(): int
@@ -56,14 +71,10 @@ class Record
 
     /**
      * @param DateTimeInterface $date
-     *
-     * @return $this
      */
-    public function setDate(DateTimeInterface $date): self
+    public function setDate(DateTimeInterface $date)
     {
         $this->date = $date;
-
-        return $this;
     }
 
     /**
@@ -76,14 +87,10 @@ class Record
 
     /**
      * @param int $distance
-     *
-     * @return $this
      */
-    public function setDistance(int $distance): self
+    public function setDistance(int $distance)
     {
         $this->distance = $distance;
-
-        return $this;
     }
 
     /**
@@ -96,33 +103,17 @@ class Record
 
     /**
      * @param int $time
-     *
-     * @return $this
      */
-    public function setTime(int $time): self
+    public function setTime(int $time)
     {
         $this->time = $time;
-
-        return $this;
     }
 
     /**
-     * @return User|null
+     * @return User
      */
-    public function getUser(): ?User
+    public function getUser(): User
     {
         return $this->user;
-    }
-
-    /**
-     * @param User $user
-     * 
-     * @return $this
-     */
-    public function setUser(User $user): self
-    {
-        $this->user = $user;
-
-        return $this;
     }
 }
