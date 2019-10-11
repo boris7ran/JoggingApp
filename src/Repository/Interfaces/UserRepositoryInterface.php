@@ -3,12 +3,27 @@
 namespace App\Repository\Interfaces;
 
 use App\Entity\User;
-use App\Model\RepositoryFilter;
+use App\Model\RecordFilter;
+use App\Model\UserFilter;
 
 interface UserRepositoryInterface
 {
-    public function ofId(int $id);
-    public function add(User $user);
-    public function remove(User $user);
-    public function filter(RepositoryFilter $filter);
+    /**
+     * @param int $id
+     *
+     * @return User
+     */
+    public function ofId(int $id): ?User;
+
+    /**
+     * @param User $user
+     *
+     * @return User
+     */
+    public function add(User $user): User;
+
+    /**
+     * @param User $user
+     */
+    public function remove(User $user): void;
 }

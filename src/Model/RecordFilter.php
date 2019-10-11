@@ -4,7 +4,7 @@ namespace App\Model;
 
 use DateTime;
 
-class RepositoryFilter
+class RecordFilter
 {
     /**
      * @var int
@@ -27,11 +27,30 @@ class RepositoryFilter
      */
     private $lastJogg;
 
-    public function __construct(int $userId, DateTime $startDate = null, DateTime $endDate = null, bool $firstJogg = null, bool $lastJogg = null)
-    {
+    /**
+     * RecordFilter constructor.
+     *
+     * @param int $userId
+     * @param DateTime|null $startDate
+     * @param DateTime|null $endDate
+     * @param bool|null $firstJogg
+     * @param bool|null $lastJogg
+     */
+    public function __construct(
+        int $userId,
+        DateTime $startDate = null,
+        DateTime $endDate = null,
+        bool $firstJogg = null,
+        bool $lastJogg = null
+    ) {
         $this->userId = $userId;
         $this->startDate = $startDate;
         $this->endDate = $endDate;
+
+        if ($firstJogg && $lastJogg) {
+            throw new \InvalidArgumentException('You can not set both firstJogg and lastJogg!');
+        }
+
         $this->firstJogg = $firstJogg;
         $this->lastJogg = $lastJogg;
     }
@@ -75,5 +94,4 @@ class RepositoryFilter
     {
         return $this->lastJogg;
     }
-
 }
