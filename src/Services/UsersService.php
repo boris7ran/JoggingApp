@@ -2,8 +2,10 @@
 
 namespace App\Services;
 
+use App\DataTransferObjects\ListUsersDto;
+use App\DataTransferObjects\UserDto;
 use App\Entity\User;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Repository\UserRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
@@ -11,9 +13,6 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class UsersService
 {
-    /**
-     * @var EntityManagerInterface
-     */
     private $em;
     /**
      * @var User
@@ -23,32 +22,43 @@ class UsersService
      * @var ValidatorInterface
      */
     private $validator;
+    /**
+     * @var UserRepository
+     */
+    private $userRepo;
 
     /**
      * UsersService constructor.
-     * @param EntityManagerInterface $em
+     * @param UserRepository $userRepo
      * @param TokenStorageInterface $tokenStorage
      * @param ValidatorInterface $validator
      */
-    public function __construct(EntityManagerInterface $em, TokenStorageInterface $tokenStorage, ValidatorInterface $validator)
+    public function __construct(UserRepository $userRepo, TokenStorageInterface $tokenStorage, ValidatorInterface $validator)
     {
-        $this->em = $em;
+        $this->userRepo = $userRepo;
         $this->user = $tokenStorage->getToken()->getUser();
         $this->validator = $validator;
     }
 
+    public function getUser(int $userId)
+    {
+        $user = $this->userRepo->ofId($userId);
+
+        return new UserDto($user);
+    }
+
     /**
-     * @return User[]
+     * @return ListUsersDto
      */
-    public function getUsers(): array
+    public function getUsers(): ListUsersDto
     {
         if (in_array('ROLE_ADMIN', $this->user->getRoles())) {
-            $users = $this->em->getRepository(User::class)->findAll();
+            $users = $this->userRepo->findAll();
         } else {
-            $users = $this->em->getRepository(User::class)->findBy(['roles' => ['ROLE_USER']]);
+            $users = $this->userRepo->findBy(['roles' => ['ROLE_USER']]);
         }
 
-        return $users;
+        return new ListUsersDto($users);
     }
 
     /**
@@ -59,7 +69,7 @@ class UsersService
      */
     public function upgradeUser(Request $request, int $id): object
     {
-        $user = $this->em->getRepository(User::class)->ofId($id);
+        $user = $this->userRepo->ofId($id);
 
         $user->setRoles([$request->get('role')]);
 
@@ -71,9 +81,8 @@ class UsersService
             return new Response($errorsString);
         }
 
-        $this->em->persist($user);
-        $this->em->flush();
+        $this->userRepo->add($user);
 
-        return $user;
+        return new UserDto($user);
     }
 }

@@ -3,11 +3,13 @@
 namespace App\Controller;
 
 use App\Services\RecordsService;
+use App\Services\UsersService;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 class RecordController extends AbstractController
 {
@@ -15,14 +17,27 @@ class RecordController extends AbstractController
      * @var RecordsService
      */
     private $recordsService;
+    /**
+     * @var UsersService
+     */
+    private $usersService;
+    /**
+     * @var User
+     */
+    private $loggedUser;
 
     /**
      * RecordController constructor.
+     *
      * @param RecordsService $recordsService
+     * @param UsersService $usersService
+     * @param TokenStorageInterface $tokenStorage
      */
-    public function __construct(RecordsService $recordsService)
+    public function __construct(RecordsService $recordsService, UsersService $usersService, TokenStorageInterface $tokenStorage)
     {
         $this->recordsService = $recordsService;
+        $this->loggedUser = $tokenStorage->getToken()->getUser();
+        $this->usersService = $usersService;
     }
 
     /**
@@ -37,11 +52,12 @@ class RecordController extends AbstractController
     {
         $startDate = $request->get('startDate');
         $endDate = $request->get('endDate');
-        $user = $this->recordsService->getUserRecords($id, $startDate, $endDate);
-        $reports = $this->recordsService->makeReports($id);
+        $records = $this->recordsService->getUserRecords($id, $startDate, $endDate)->getRecords();
+        $user = $this->usersService->getUser($id);
+        $reports = $records ? $this->recordsService->makeReports($user->getId()) : [];
         $this->denyAccessUnlessGranted('view', $user);
 
-        return $this->render('records/show.html.twig', ['user' => $user, 'reports' => $reports]);
+        return $this->render('records/show.html.twig', ['user' => $user, 'records' => $records, 'reports' => $reports]);
     }
 
     /**
@@ -51,10 +67,11 @@ class RecordController extends AbstractController
      */
     public function myRecords(): Response
     {
-        $user = $this->recordsService->getUserRecords();
-        $reports = $this->recordsService->makeReports($user->getId());
+        $records = $this->recordsService->getUserRecords($this->loggedUser->getId())->getRecords();
+        $user = $this->usersService->getUser($this->loggedUser->getId());
+        $reports = $records ? $this->recordsService->makeReports($this->loggedUser->getId()) : [];
 
-        return $this->render('records/show.html.twig', ['user' => $user, 'reports' => $reports]);
+        return $this->render('records/show.html.twig', ['user' => $user, 'records' => $records, 'reports' => $reports]);
     }
 
     /**
@@ -97,6 +114,7 @@ class RecordController extends AbstractController
 
     /**
      * @param int $id
+     *
      * @return RedirectResponse
      */
     public function delete(int $id): RedirectResponse

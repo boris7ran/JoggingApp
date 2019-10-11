@@ -27,11 +27,12 @@ services:
     # please note that last definitions always *replace* previous ones
     App\Services\RecordsService:
         arguments:
-            $em: '@doctrine.orm.default_entity_manager'
+            $recordRepo: '@App\Repository\RecordRepository'
+            $userRepo: '@App\Repository\UserRepository'
 
     App\Services\UsersService:
         arguments:
-            $em: '@doctrine.orm.default_entity_manager'
+            $userRepo: '@App\Repository\UserRepository'
 
     App\Services\AuthService:
         arguments:

@@ -2,11 +2,14 @@
 
 namespace App\Services;
 
+use App\DataTransferObjects\ListRecordsDto;
+use App\DataTransferObjects\RecordDto;
+use App\DataTransferObjects\UserDto;
 use App\Entity\Record;
-use App\Entity\User;
-use App\Model\RepositoryFilter;
+use App\Model\Builders\RecordFilterBuilder;
+use App\Repository\RecordRepository;
+use App\Repository\UserRepository;
 use DateTime;
-use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
@@ -14,59 +17,51 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 class RecordsService
 {
     /**
-     * @var EntityManagerInterface
+     * @var RecordRepository $recordRepo
      */
-    private $em;
+    private $recordRepo;
     /**
-     * @var object|string
+     * @var UserRepository $userRepo
      */
-    private $user;
+    private $userRepo;
 
     /**
      * RecordsService constructor.
-     * @param EntityManagerInterface $em
-     * @param TokenStorageInterface $tokenStorage
+     *
+     * @param RecordRepository $recordRepo
+     * @param UserRepository $userRepo
      */
-    public function __construct(EntityManagerInterface $em, TokenStorageInterface $tokenStorage)
-    {
-        $this->em = $em;
-        $this->user = $tokenStorage->getToken()->getUser();
+    public function __construct(
+        RecordRepository $recordRepo,
+        UserRepository $userRepo
+    ) {
+        $this->recordRepo = $recordRepo;
+        $this->userRepo = $userRepo;
     }
 
     /**
-     * @param int|null $id
+     * @param int|null $userId
      * @param string|null $startDate
      * @param string|null $endDate
      *
-     * @return User
+     * @return ListRecordsDto
      *
      * @throws Exception
      */
-    public function getUserRecords(int $id = null, string $startDate = null, string $endDate = null): User
+    public function getUserRecords(
+        int $userId,
+        string $startDate = null,
+        string $endDate = null
+    ): ListRecordsDto
     {
-        if ($startDate) {
-            $startDate = DateTime::createFromFormat("Y-m-d", $startDate);
-        }
+        $filter = RecordFilterBuilder::valueOf()
+            ->startDateText($startDate)
+            ->endDateText($endDate)
+            ->userId($userId)
+            ->build();
+        $records = $this->recordRepo->filter($filter);
 
-        if ($endDate) {
-            $endDate = DateTime::createFromFormat("Y-m-d", $endDate);
-        }
-
-        if (!$id) {
-            $user = $this->user;
-        } else {
-            $filter = new RepositoryFilter($id, $startDate, $endDate);
-            $user = $this->em->getRepository(User::class)->filter($filter);
-            if (!$user) {
-                $user = $this->em->getRepository(User::class)->find($id);
-            }
-        }
-
-        if (!$user) {
-            throw new Exception('No user found with id ' . $id);
-        }
-
-        return $user;
+        return new ListRecordsDto($records);
     }
 
     /**
@@ -81,41 +76,42 @@ class RecordsService
     /**
      * @param int $id
      *
-     * @return Record
+     * @return RecordDto
      */
-    public function editRecord(int $id): Record
+    public function editRecord(int $id): RecordDto
     {
-        $record = $this->em->getRepository(Record::class)->find($id);
+        $record = $this->recordRepo->find($id);
 
-        return $record;
+        return new RecordDto($record);
     }
 
     /**
      * @param Request $request
      * @param int $id
      *
-     * @return Record
+     * @return RecordDto
      */
-    public function putEditedRecord(Request $request, int $id): Record
+    public function putEditedRecord(Request $request, int $id): RecordDto
     {
-        $record = $this->em->getRepository(Record::class)->find($id);
+        $record = $this->recordRepo->find($id);
 
         $record  = $this->parseRecordRequest($request, $record);
+        dump($record);
 
-        return $record;
+        return new RecordDto($record);
     }
 
     /**
      * @param int $id
      *
-     * @return Record
+     * @return RecordDto
      */
-    public function deleteRecord(int $id): Record
+    public function deleteRecord(int $id): RecordDto
     {
-        $record = $this->em->getRepository(Record::class)->ofId($id);
-        $this->em->getRepository(Record::class)->remove($record);
+        $record = $this->recordRepo->ofId($id);
+        $this->recordRepo->remove($record);
 
-        return $record;
+        return new RecordDto($record);
     }
 
     /**
@@ -123,16 +119,16 @@ class RecordsService
      * @param Record|null $record
      * @param int|null $id
      *
-     * @return Record|null
+     * @return Record
      */
-    protected function parseRecordRequest(Request $request, Record $record = null, int $id=null): ?Record
+    protected function parseRecordRequest(Request $request, Record $record = null, int $id=null): Record
     {
         $date = DateTime::createFromFormat("Y-m-d", $request->get('date'));
         $distance = $request->get('distance');
         $time = $request->get('time');
 
         if (!$record && $id !== null) {
-            $user = $this->em->getRepository(User::class)->find($id);
+            $user = $this->userRepo->find($id);
             $record = new Record($date, $time, $distance, $user);
         } else {
             $record->setDate($date);
@@ -140,7 +136,7 @@ class RecordsService
             $record->setTime($time);
         }
 
-        $this->em->getRepository(Record::class)->add($record);
+        $this->recordRepo->add($record);
 
         return $record;
     }
@@ -154,28 +150,26 @@ class RecordsService
      */
     public function makeReports(int $id): array
     {
-        $filterFirstJogg = new RepositoryFilter($id, null, null, true);
-        $filterLastJogg = new RepositoryFilter($id, null, null, false, true);
+        $builder = new RecordFilterBuilder();
+        $filter = $builder->userId($id)->firstJogg()->build();
 
-        $firstJogg = $this->em->getRepository(Record::class)->filter($filterFirstJogg)[1];
-        $lastJogg = $this->em->getRepository(Record::class)->filter($filterLastJogg)[1];
-        $firstJogg = DateTime::createFromFormat("Y-m-d", $firstJogg);
-        $lastJogg = DateTime::createFromFormat("Y-m-d", $lastJogg);
+        $firstJogg = $this->recordRepo->filter($filter)[0]->getDate();
+
+        $filter = $builder->lastJogg()->build();
+        $lastJogg = $this->recordRepo->filter($filter)[0]->getDate();
 
         if (!$firstJogg) {
             return [];
         }
+
         $firstDayWeek = DateService::getStartDate($firstJogg);
-
         $reports = [];
-
+        $weeklyBuilder = new RecordFilterBuilder();
 
         for ($i = $firstDayWeek; $i < $lastJogg; $i->modify('+7 days')) {
             $lastDayOfCurrentWeek = DateService::getEndDate($i);
-            $weekRecordsFilter = new RepositoryFilter($id, $i, $lastDayOfCurrentWeek);
-
-            $records = $this->em->getRepository(Record::class)
-                ->filter($weekRecordsFilter);
+            $filter = $weeklyBuilder->userId($id)->startDate($i)->endDate($lastDayOfCurrentWeek)->build();
+            $records = $this->recordRepo->filter($filter);
 
             if ($records) {
                 $report = $this->calculateAverage($records);
@@ -198,8 +192,8 @@ class RecordsService
         $averageTime = 0;
 
         foreach ($records as $record) {
-            $averageTime += $record['time'];
-            $averageDistance += $record['distance'];
+            $averageTime += $record->getTime();
+            $averageDistance += $record->getDistance();
         }
 
         $averageTime = $averageTime/count($records);

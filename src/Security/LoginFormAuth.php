@@ -154,6 +154,9 @@ class LoginFormAuth extends AbstractFormLoginAuthenticator
         );
     }
 
+    /**
+     * @return string
+     */
     protected function getLoginUrl()
     {
         return $this->router->generate('login_user');

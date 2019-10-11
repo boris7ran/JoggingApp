@@ -2,6 +2,7 @@
 
 namespace App\Security;
 
+use App\DataTransferObjects\UserDto;
 use App\Entity\User;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
@@ -23,7 +24,7 @@ class RecordVoter extends Voter
             return false;
         }
 
-        if (!$subject instanceof User) {
+        if (!$subject instanceof UserDto) {
             return false;
         }
 
@@ -32,7 +33,7 @@ class RecordVoter extends Voter
 
     /**
      * @param string $attribute
-     * @param mixed $subject
+     * @param UserDto $subject
      * @param TokenInterface $token
      *
      * @return bool
@@ -54,12 +55,12 @@ class RecordVoter extends Voter
     }
 
     /**
-     * @param User $owner
+     * @param UserDto $owner
      * @param User $user
      *
      * @return bool
      */
-    private function canView(User $owner, User $user): bool
+    private function canView(UserDto $owner, User $user): bool
     {
         if ($this->canEdit($owner, $user)) {
             return true;
@@ -69,12 +70,12 @@ class RecordVoter extends Voter
     }
 
     /**
-     * @param User $owner
+     * @param UserDto $owner
      * @param User $user
      *
      * @return bool
      */
-    private function canEdit(User $owner, User $user): bool
+    private function canEdit(UserDto $owner, User $user): bool
     {
         if (in_array('ROLE_ADMIN', $user->getRoles())) {
             return true;
