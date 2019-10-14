@@ -5,7 +5,6 @@ namespace App\Entity;
 use App\Validator\Constraints\CheckRole;
 use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Mapping\ClassMetadata;
@@ -37,11 +36,6 @@ class User implements UserInterface
      * @ORM\Column(type="simple_array")
      */
     private $roles;
-
-    /**
-     * @ORM\OneToMany(targetEntity="App\Entity\Record", mappedBy="user", orphanRemoval=true)
-     */
-    private $records;
 
     /**
      * User constructor.
@@ -153,14 +147,6 @@ class User implements UserInterface
         }
 
         return true;
-    }
-
-    /**
-     * @return Collection
-     */
-    public function getRecords(): Collection
-    {
-        return $this->records;
     }
 
     /**

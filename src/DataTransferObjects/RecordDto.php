@@ -3,7 +3,6 @@
 namespace App\DataTransferObjects;
 
 use App\Entity\Record;
-use App\Entity\User;
 use DateTime;
 
 class RecordDto

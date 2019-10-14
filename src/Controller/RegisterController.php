@@ -2,27 +2,28 @@
 
 namespace App\Controller;
 
-use App\Services\AuthService;
+use App\Services\UsersService;
+use Doctrine\ORM\ORMException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 class RegisterController extends AbstractController
 {
     /**
-     * @var AuthService
+     * @var UsersService
      */
-    private $authService;
+    private $usersService;
 
     /**
      * RegisterController constructor.
-     * @param AuthService $authService
+     *
+     * @param UsersService $usersService
      */
-    public function __construct(AuthService $authService)
+    public function __construct(UsersService $usersService)
     {
-        $this->authService = $authService;
+        $this->usersService = $usersService;
     }
 
     /**
@@ -35,15 +36,16 @@ class RegisterController extends AbstractController
 
     /**
      * @param Request $request
-     * @param UserPasswordEncoderInterface $passwordEncoder
      *
      * @return RedirectResponse
+     *
+     * @throws ORMException
      */
-    public function store(Request $request, UserPasswordEncoderInterface $passwordEncoder)
+    public function store(Request $request)
     {
         $username = $request->get('name');
         $password = $request->get('password');
-        $this->authService->storeUser($username, $password, $passwordEncoder);
+        $this->usersService->storeUser($username, $password);
 
         return $this->redirectToRoute('login_user');
     }

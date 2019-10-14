@@ -8,6 +8,7 @@ use App\Entity\Record;
 use App\Model\Builders\RecordFilterBuilder;
 use App\Repository\Interfaces\RecordRepositoryInterface;
 use App\Repository\Interfaces\UserRepositoryInterface;
+use App\Utility\DateService;
 use DateTime;
 use Exception;
 

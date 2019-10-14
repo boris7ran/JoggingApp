@@ -33,7 +33,3 @@ services:
     App\Services\UsersService:
         arguments:
             $userRepo: '@App\Repository\UserRepository'
-
-    App\Services\AuthService:
-        arguments:
-            $userRepo: '@App\Repository\UserRepository'

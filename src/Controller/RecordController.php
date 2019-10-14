@@ -89,8 +89,6 @@ class RecordController extends AbstractController
      * @param int $userId
      *
      * @return RedirectResponse
-     *
-     * @throws ORMException
      */
     public function store(Request $request, int $userId): RedirectResponse
     {

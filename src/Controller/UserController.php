@@ -15,6 +15,11 @@ class UserController extends AbstractController
      */
     private $usersService;
 
+    /**
+     * UserController constructor.
+     *
+     * @param UsersService $usersService
+     */
     public function __construct(
         UsersService $usersService
     ) {
@@ -26,7 +31,8 @@ class UserController extends AbstractController
      */
     public function index(): Response
     {
-        $users = $this->usersService->getUsers()->getUsers();
+        $authUser = $this->getUser();
+        $users = $this->usersService->getUsers($authUser)->getUsers();
 
         return $this->render('users/index.html.twig', ['users' => $users]);
     }
@@ -40,7 +46,7 @@ class UserController extends AbstractController
     public function upgrade(Request $request, int $id): RedirectResponse
     {
         $newRole[] = $request->get('role');
-        $user = $this->usersService->upgradeUser($newRole, $id);
+        $this->usersService->upgradeUser($newRole, $id);
 
         return $this->redirectToRoute('all_users');
     }
