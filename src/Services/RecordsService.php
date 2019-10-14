@@ -170,14 +170,17 @@ class RecordsService
         $reports = [];
         $weeklyBuilder = new RecordFilterBuilder();
 
-        for ($i = $firstDayWeek; $i < $lastJogg; $i->modify('+7 days')) {
-            $lastDayOfCurrentWeek = DateService::getEndDate($i);
-            $filter = $weeklyBuilder->userId($id)->startDate($i)->endDate($lastDayOfCurrentWeek)->build();
+        for ($firstDayOfCurrentWeek = $firstDayWeek;
+             $firstDayOfCurrentWeek < $lastJogg;
+             $firstDayOfCurrentWeek->modify('+7 days'))
+        {
+            $lastDayOfCurrentWeek = DateService::getEndDate($firstDayOfCurrentWeek);
+            $filter = $weeklyBuilder->userId($id)->startDate($firstDayOfCurrentWeek)->endDate($lastDayOfCurrentWeek)->build();
             $records = $this->recordRepo->filter($filter);
 
             if ($records) {
                 $report = $this->calculateAverage($records);
-                $report["week"] = $i->format("W");
+                $report["week"] = $firstDayOfCurrentWeek->format("W");
                 $reports[] = $report;
             }
         }
