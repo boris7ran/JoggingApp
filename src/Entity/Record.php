@@ -40,6 +40,7 @@ class Record
 
     /**
      * Record constructor.
+     *
      * @param DateTimeInterface $date
      * @param int $time
      * @param int $distance

@@ -9,14 +9,30 @@ use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 
 class CheckRoleValidator extends ConstraintValidator
 {
+    /**
+     * @var
+     */
     public $security;
+
+    /**
+     * @var AuthorizationCheckerInterface
+     */
     public $checker;
 
+    /**
+     * CheckRoleValidator constructor.
+     *
+     * @param AuthorizationCheckerInterface $checker
+     */
     public function __construct(AuthorizationCheckerInterface $checker)
     {
         $this->checker = $checker;
     }
 
+    /**
+     * @param mixed $value
+     * @param Constraint $constraint
+     */
     public function validate($value, Constraint $constraint)
     {
         if (!$constraint instanceof CheckRole) {

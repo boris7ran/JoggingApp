@@ -3,8 +3,6 @@
 namespace App\Repository\Interfaces;
 
 use App\Entity\User;
-use App\Model\RecordFilter;
-use App\Model\UserFilter;
 
 interface UserRepositoryInterface
 {

@@ -3,17 +3,17 @@
 namespace App\Repository;
 
 use App\Entity\User;
-use App\Model\RecordFilter;
-use App\Model\UserFilter;
 use App\Repository\Interfaces\UserRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Persistence\ManagerRegistry;
 use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\ORMException;
 
 class UserRepository extends ServiceEntityRepository implements UserRepositoryInterface
 {
     /**
      * UserRepository constructor.
+     *
      * @param ManagerRegistry $registry
      */
     public function __construct(ManagerRegistry $registry)
@@ -25,6 +25,8 @@ class UserRepository extends ServiceEntityRepository implements UserRepositoryIn
      * @param int $id
      *
      * @return User|null
+     *
+     * @throws NonUniqueResultException
      */
     public function ofId(int $id): ?User
     {
@@ -39,6 +41,8 @@ class UserRepository extends ServiceEntityRepository implements UserRepositoryIn
      * @param User $user
      *
      * @return User
+     *
+     * @throws ORMException
      */
     public function add(User $user): User
     {
@@ -50,6 +54,8 @@ class UserRepository extends ServiceEntityRepository implements UserRepositoryIn
 
     /**
      * @param User $user
+     *
+     * @throws ORMException
      */
     public function remove(User $user): void
     {

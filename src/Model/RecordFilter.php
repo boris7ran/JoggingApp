@@ -10,18 +10,22 @@ class RecordFilter
      * @var int
      */
     private $userId;
+
     /**
      * @var DateTime
      */
     private $startDate;
+
     /**
      * @var DateTime
      */
     private $endDate;
+
     /**
      * @var bool
      */
     private $firstJogg;
+
     /**
      * @var bool
      */

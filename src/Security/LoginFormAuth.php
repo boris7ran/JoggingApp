@@ -30,18 +30,22 @@ class LoginFormAuth extends AbstractFormLoginAuthenticator
      * @var EntityManagerInterface
      */
     private $entityManager;
+
     /**
      * @var RouterInterface
      */
     private $router;
+
     /**
      * @var CsrfTokenManagerInterface
      */
     private $csrfTokenManager;
+
     /**
      * @var UserPasswordEncoderInterface
      */
     private $passwordEncoder;
+
     /**
      * @var TokenStorageInterface
      */
@@ -49,6 +53,7 @@ class LoginFormAuth extends AbstractFormLoginAuthenticator
 
     /**
      * LoginFormAuth constructor.
+     *
      * @param EntityManagerInterface $entityManager
      * @param RouterInterface $router
      * @param CsrfTokenManagerInterface $csrfTokenManager
@@ -125,7 +130,7 @@ class LoginFormAuth extends AbstractFormLoginAuthenticator
 
     /**
      * @param mixed $credentials
-     * @param UserInterface
+     * @param UserInterface $user
      *
      * @return bool
      */
