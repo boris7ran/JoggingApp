@@ -6,33 +6,31 @@ use App\DataTransferObjects\ListRecordsDto;
 use App\DataTransferObjects\RecordDto;
 use App\Entity\Record;
 use App\Model\Builders\RecordFilterBuilder;
-use App\Repository\RecordRepository;
-use App\Repository\UserRepository;
+use App\Repository\Interfaces\RecordRepositoryInterface;
+use App\Repository\Interfaces\UserRepositoryInterface;
 use DateTime;
-use Doctrine\ORM\NonUniqueResultException;
-use Doctrine\ORM\ORMException;
 use Exception;
 
 class RecordsService
 {
     /**
-     * @var RecordRepository $recordRepo
+     * @var RecordRepositoryInterface $recordRepo
      */
     private $recordRepo;
     /**
-     * @var UserRepository $userRepo
+     * @var UserRepositoryInterface $userRepo
      */
     private $userRepo;
 
     /**
      * RecordsService constructor.
      *
-     * @param RecordRepository $recordRepo
-     * @param UserRepository $userRepo
+     * @param RecordRepositoryInterface $recordRepo
+     * @param UserRepositoryInterface $userRepo
      */
     public function __construct(
-        RecordRepository $recordRepo,
-        UserRepository $userRepo
+        RecordRepositoryInterface $recordRepo,
+        UserRepositoryInterface $userRepo
     ) {
         $this->recordRepo = $recordRepo;
         $this->userRepo = $userRepo;
@@ -61,15 +59,16 @@ class RecordsService
     }
 
     /**
-     * @param int $id
+     * @param int $recordId
      *
-     * @return RecordDto
+     * @return RecordDto|null
      */
-    public function getUserRecord(int $id): RecordDto
+    public function getRecord(int $recordId): ?RecordDto
     {
-        $record = $this->recordRepo->ofId($id);
+        $record = $this->recordRepo->ofId($recordId);
+        $recordDto = new RecordDto($record);
 
-        return new RecordDto($record);
+        return $recordDto;
     }
 
     /**
@@ -79,8 +78,6 @@ class RecordsService
      * @param int $userId
      *
      * @return RecordDto
-     *
-     * @throws ORMException
      */
     public function storeNewRecord(
         DateTime $date,
@@ -88,25 +85,11 @@ class RecordsService
         int $distance,
         int $userId
     ): RecordDto {
-        $user = $this->userRepo->find($userId);
+        $user = $this->userRepo->ofId($userId);
         $record = $user->addRecord($date, $time, $distance);
         $record = $this->recordRepo->add($record);
 
         return new RecordDto($record);
-    }
-
-    /**
-     * @param int $recordId
-     *
-     * @return RecordDto|null
-     *
-     * @throws NonUniqueResultException
-     */
-    public function getRecord(int $recordId): ?RecordDto
-    {
-        $recordDto = new RecordDto($this->recordRepo->ofId($recordId));
-
-        return $recordDto;
     }
 
     /**
@@ -116,12 +99,14 @@ class RecordsService
      * @param int $recordId
      *
      * @return RecordDto
-     *
-     * @throws ORMException
      */
-    public function editRecord(DateTime $date, int $time, int $distance, int $recordId): RecordDto
-    {
-        $record = $this->recordRepo->find($recordId);
+    public function editRecord(
+        DateTime $date,
+        int $time,
+        int $distance,
+        int $recordId
+    ): RecordDto {
+        $record = $this->recordRepo->ofId($recordId);
         $record->setDate($date);
         $record->setDistance($distance);
         $record->setTime($time);

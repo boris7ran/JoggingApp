@@ -5,6 +5,8 @@ namespace App\Services;
 use App\DataTransferObjects\ListUsersDto;
 use App\DataTransferObjects\UserDto;
 use App\Entity\User;
+use App\Model\Builders\RecordFilterBuilder;
+use App\Model\Builders\UserFilterBuilder;
 use App\Repository\UserRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\ORMException;
@@ -54,10 +56,13 @@ class UsersService
      */
     public function getUsers(): ListUsersDto
     {
+        $userFilterBuilder = new UserFilterBuilder();
         if (in_array('ROLE_ADMIN', $this->user->getRoles())) {
-            $users = $this->userRepo->findAll();
+            $userFilter = $userFilterBuilder->build();
+            $users = $this->userRepo->filter($userFilter);
         } else {
-            $users = $this->userRepo->findBy(['roles' => ['ROLE_USER']]);
+            $userFilter = $userFilterBuilder->users()->build();
+            $users = $this->userRepo->filter($userFilter);
         }
 
         return new ListUsersDto($users);

@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\User;
+use App\Model\UserFilter;
 use App\Repository\Interfaces\UserRepositoryInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Persistence\ManagerRegistry;
@@ -35,6 +36,18 @@ class UserRepository extends ServiceEntityRepository implements UserRepositoryIn
             ->setParameter('id', $id)
             ->getQuery()
             ->getOneOrNullResult();
+    }
+
+    public function filter(UserFilter $filter)
+    {
+        $query = $this->createQueryBuilder('u');
+
+        if ($filter->getRoles()) {
+            $query->andWhere('u.roles = :roles')
+                ->setParameter('roles', $filter->getRoles());
+        }
+
+        return $query->getQuery()->getResult();
     }
 
     /**
