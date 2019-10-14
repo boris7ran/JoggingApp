@@ -72,11 +72,11 @@ class RecordFilterBuilder
     }
 
     /**
-     * @param string $startDate
+     * @param string|null $startDate
      *
      * @return RecordFilterBuilder
      */
-    public function startDateText(string $startDate = null): RecordFilterBuilder
+    public function startDateText(?string $startDate): RecordFilterBuilder
     {
         if (empty($startDate)) {
             return $this;
@@ -100,11 +100,11 @@ class RecordFilterBuilder
     }
 
     /**
-     * @param string $endDate
+     * @param string|null $endDate
      *
      * @return $this
      */
-    public function endDateText(string $endDate = null): RecordFilterBuilder
+    public function endDateText(?string $endDate): RecordFilterBuilder
     {
         if (empty($endDate)) {
             return $this;

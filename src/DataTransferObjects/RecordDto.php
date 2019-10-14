@@ -3,6 +3,7 @@
 namespace App\DataTransferObjects;
 
 use App\Entity\Record;
+use App\Entity\User;
 use DateTime;
 
 class RecordDto
@@ -28,6 +29,11 @@ class RecordDto
     private $distance;
 
     /**
+     * @var UserDto
+     */
+    private $user;
+
+    /**
      * RecordDto constructor.
      *
      * @param Record $record
@@ -38,6 +44,7 @@ class RecordDto
         $this->date = $record->getDate();
         $this->time = $record->getTime();
         $this->distance = $record->getDistance();
+        $this->user = new UserDto($record->getUser());
     }
 
     /**
@@ -70,5 +77,13 @@ class RecordDto
     public function getDistance(): int
     {
         return $this->distance;
+    }
+
+    /**
+     * @return UserDto
+     */
+    public function getUser(): UserDto
+    {
+        return $this->user;
     }
 }

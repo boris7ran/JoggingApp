@@ -2,12 +2,10 @@
 
 namespace App\DataTransferObjects;
 
-use App\Entity\User;
-
 class ListUsersDto
 {
     /**
-     * @var User[] $users
+     * @var UserDto[] $users
      */
     private $users;
 
@@ -24,12 +22,10 @@ class ListUsersDto
     }
 
     /**
-     * @return User[]
+     * @return UserDto[]
      */
     public function getUsers(): array
     {
         return $this->users;
     }
-
-
 }

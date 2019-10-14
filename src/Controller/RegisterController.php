@@ -41,7 +41,9 @@ class RegisterController extends AbstractController
      */
     public function store(Request $request, UserPasswordEncoderInterface $passwordEncoder)
     {
-        $this->authService->storeUser($request, $passwordEncoder);
+        $username = $request->get('name');
+        $password = $request->get('password');
+        $this->authService->storeUser($username, $password, $passwordEncoder);
 
         return $this->redirectToRoute('login_user');
     }

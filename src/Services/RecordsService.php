@@ -4,15 +4,14 @@ namespace App\Services;
 
 use App\DataTransferObjects\ListRecordsDto;
 use App\DataTransferObjects\RecordDto;
-use App\DataTransferObjects\UserDto;
 use App\Entity\Record;
 use App\Model\Builders\RecordFilterBuilder;
 use App\Repository\RecordRepository;
 use App\Repository\UserRepository;
 use DateTime;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\ORMException;
 use Exception;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 class RecordsService
 {
@@ -40,20 +39,17 @@ class RecordsService
     }
 
     /**
-     * @param int|null $userId
+     * @param int $userId
      * @param string|null $startDate
      * @param string|null $endDate
      *
      * @return ListRecordsDto
-     *
-     * @throws Exception
      */
     public function getUserRecords(
         int $userId,
         string $startDate = null,
         string $endDate = null
-    ): ListRecordsDto
-    {
+    ): ListRecordsDto {
         $filter = RecordFilterBuilder::valueOf()
             ->startDateText($startDate)
             ->endDateText($endDate)
@@ -65,80 +61,88 @@ class RecordsService
     }
 
     /**
-     * @param Request $request
-     * @param int $id
-     */
-    public function storeNewRecord(Request $request, int $id)
-    {
-        $this->parseRecordRequest($request, null, $id);
-    }
-
-    /**
      * @param int $id
      *
      * @return RecordDto
      */
-    public function editRecord(int $id): RecordDto
-    {
-        $record = $this->recordRepo->find($id);
-
-        return new RecordDto($record);
-    }
-
-    /**
-     * @param Request $request
-     * @param int $id
-     *
-     * @return RecordDto
-     */
-    public function putEditedRecord(Request $request, int $id): RecordDto
-    {
-        $record = $this->recordRepo->find($id);
-
-        $record  = $this->parseRecordRequest($request, $record);
-        dump($record);
-
-        return new RecordDto($record);
-    }
-
-    /**
-     * @param int $id
-     *
-     * @return RecordDto
-     */
-    public function deleteRecord(int $id): RecordDto
+    public function getUserRecord(int $id): RecordDto
     {
         $record = $this->recordRepo->ofId($id);
-        $this->recordRepo->remove($record);
 
         return new RecordDto($record);
     }
 
     /**
-     * @param Request $request
-     * @param Record|null $record
-     * @param int|null $id
+     * @param DateTime $date
+     * @param int $time
+     * @param int $distance
+     * @param int $userId
      *
-     * @return Record
+     * @return RecordDto
+     *
+     * @throws ORMException
      */
-    protected function parseRecordRequest(Request $request, Record $record = null, int $id=null): Record
-    {
-        $date = DateTime::createFromFormat("Y-m-d", $request->get('date'));
-        $distance = $request->get('distance');
-        $time = $request->get('time');
+    public function storeNewRecord(
+        DateTime $date,
+        int $time,
+        int $distance,
+        int $userId
+    ): RecordDto {
+        $user = $this->userRepo->find($userId);
+        $record = $user->addRecord($date, $time, $distance);
+        $record = $this->recordRepo->add($record);
 
-        if (!$record && $id !== null) {
-            $user = $this->userRepo->find($id);
-            $record = new Record($date, $time, $distance, $user);
-        } else {
-            $record->setDate($date);
-            $record->setDistance($distance);
-            $record->setTime($time);
-        }
+        return new RecordDto($record);
+    }
+
+    /**
+     * @param int $recordId
+     *
+     * @return RecordDto|null
+     *
+     * @throws NonUniqueResultException
+     */
+    public function getRecord(int $recordId): ?RecordDto
+    {
+        $recordDto = new RecordDto($this->recordRepo->ofId($recordId));
+
+        return $recordDto;
+    }
+
+    /**
+     * @param DateTime $date
+     * @param int $time
+     * @param int $distance
+     * @param int $recordId
+     *
+     * @return RecordDto
+     *
+     * @throws ORMException
+     */
+    public function editRecord(DateTime $date, int $time, int $distance, int $recordId): RecordDto
+    {
+        $record = $this->recordRepo->find($recordId);
+        $record->setDate($date);
+        $record->setDistance($distance);
+        $record->setTime($time);
 
         $this->recordRepo->add($record);
 
-        return $record;
+        return new RecordDto($record);
+    }
+
+    /**
+     * @param int $recordId
+     *
+     * @return RecordDto
+     */
+    public function deleteRecord(int $recordId): RecordDto
+    {
+        $record = $this->recordRepo->ofId($recordId);
+        $recordDto = new RecordDto($record);
+        $this->recordRepo->remove($record);
+
+        return $recordDto;
     }
 
     /**

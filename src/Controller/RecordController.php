@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Services\RecordsService;
 use App\Services\UsersService;
+use Doctrine\ORM\ORMException;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -17,10 +18,12 @@ class RecordController extends AbstractController
      * @var RecordsService
      */
     private $recordsService;
+
     /**
      * @var UsersService
      */
     private $usersService;
+
     /**
      * @var User
      */
@@ -41,23 +44,27 @@ class RecordController extends AbstractController
     }
 
     /**
-     * @param int $id
+     * @param int $userId
      * @param Request $request
      *
      * @return Response
      *
      * @throws Exception
      */
-    public function show(int $id, Request $request): Response
+    public function show(Request $request, int $userId): Response
     {
         $startDate = $request->get('startDate');
         $endDate = $request->get('endDate');
-        $records = $this->recordsService->getUserRecords($id, $startDate, $endDate)->getRecords();
-        $user = $this->usersService->getUser($id);
+        $records = $this->recordsService
+            ->getUserRecords($userId, $startDate, $endDate)
+            ->getRecords();
+        $user = $this->usersService->getUser($userId);
         $reports = $records ? $this->recordsService->makeReports($user->getId()) : [];
         $this->denyAccessUnlessGranted('view', $user);
 
-        return $this->render('records/show.html.twig', ['user' => $user, 'records' => $records, 'reports' => $reports]);
+        return $this->render('records/show.html.twig',
+            ['user' => $user, 'records' => $records, 'reports' => $reports]
+        );
     }
 
     /**
@@ -71,56 +78,67 @@ class RecordController extends AbstractController
         $user = $this->usersService->getUser($this->loggedUser->getId());
         $reports = $records ? $this->recordsService->makeReports($this->loggedUser->getId()) : [];
 
-        return $this->render('records/show.html.twig', ['user' => $user, 'records' => $records, 'reports' => $reports]);
+        return $this->render(
+            'records/show.html.twig',
+            ['user' => $user, 'records' => $records, 'reports' => $reports]
+        );
     }
 
     /**
      * @param Request $request
-     * @param int $id
+     * @param int $userId
      *
      * @return RedirectResponse
+     *
+     * @throws ORMException
      */
-    public function store(Request $request, int $id): RedirectResponse
+    public function store(Request $request, int $userId): RedirectResponse
     {
-        $this->recordsService->storeNewRecord($request, $id);
+        $date = \DateTime::createFromFormat('Y-m-d', $request->get('date'));
+        $time = $request->get('time');
+        $distance = $request->get('distance');
+        $this->recordsService->storeNewRecord($date, $time, $distance, $userId);
 
-        return $this->redirectToRoute('show_records', ['id' => $id]);
+        return $this->redirectToRoute('show_records', ['userId' => $userId]);
     }
 
     /**
-     * @param int $id
+     * @param int $recordId
      *
      * @return Response
      */
-    public function edit(int $id): Response
+    public function edit(int $recordId): Response
     {
-        $record = $this->recordsService->editRecord($id);
+        $record = $this->recordsService->getRecord($recordId);
 
         return $this->render('records/edit.html.twig', ['record' => $record]);
     }
 
     /**
      * @param Request $request
-     * @param int $id
+     * @param int $recordId
      *
      * @return RedirectResponse
      */
-    public function put(Request $request, int $id): RedirectResponse
+    public function put(Request $request, int $recordId): RedirectResponse
     {
-        $record = $this->recordsService->putEditedRecord($request, $id);
+        $date = \DateTime::createFromFormat('Y-m-d', $request->get('date'));
+        $time = $request->get('time');
+        $distance = $request->get('distance');
+        $record = $this->recordsService->editRecord($date, $time, $distance, $recordId);
 
-        return $this->redirectToRoute('show_records', ['id' => $record->getUser()->getId()]);
+        return $this->redirectToRoute('show_records', ['userId' => $record->getUser()->getId()]);
     }
 
     /**
-     * @param int $id
+     * @param int $recordId
      *
      * @return RedirectResponse
      */
-    public function delete(int $id): RedirectResponse
+    public function delete(int $recordId): RedirectResponse
     {
-        $record = $this->recordsService->deleteRecord($id);
+        $record = $this->recordsService->deleteRecord($recordId);
 
-        return $this->redirectToRoute('show_records', ['id' => $record->getUser()->getId()]);
+        return $this->redirectToRoute('show_records', ['userId' => $record->getUser()->getId()]);
     }
 }

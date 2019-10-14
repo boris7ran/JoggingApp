@@ -25,7 +25,7 @@
 
     {% if records |length > 0 %}
 
-        <form method="post" action="{{ path('show_records', {'id': user.getId }) }}">
+        <form method="post" action="{{ path('show_records', {'userId': user.getId }) }}">
             <div class="row mt-3 ml-1">
                 <div class="form-group row col-sm-4">
                     <label for="startDate" class="form-control col-sm-4">From: </label>
@@ -61,8 +61,8 @@
                     <td>{{ record.time }} min</td>
                     <td>{{ (record.distance/record.time*60)|round(3) }} km/h</td>
                     <td class="btn-group">
-                        <button class="btn btn-secondary"><a href="{{ path('delete_record', {'id': record.getId}) }}" style="color: white">Delete</a></button>
-                        <button class="btn btn-secondary"><a href="{{ path('edit_record', {'id': record.getId}) }}" style="color: white">Edit</a></button>
+                        <button class="btn btn-secondary"><a href="{{ path('delete_record', {'recordId': record.getId}) }}" style="color: white">Delete</a></button>
+                        <button class="btn btn-secondary"><a href="{{ path('edit_record', {'recordId': record.getId}) }}" style="color: white">Edit</a></button>
                     </td>
                 </tr>
             {% endfor %}
@@ -70,7 +70,7 @@
 
     {% endif %}
 
-    <form method="POST" action="{{ path('store_record', {'id': user.getId}) }}"  class="pt-5">
+    <form method="POST" action="{{ path('store_record', {'userId': user.getId}) }}"  class="pt-5">
         <div class="form-group row m-1">
             <label for="date" class="form-control col-sm-2">Date</label>
             <input type="date" class="form-control col-sm-4" id="date" name="date">

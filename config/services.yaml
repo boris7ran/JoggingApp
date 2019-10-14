@@ -36,4 +36,4 @@ services:
 
     App\Services\AuthService:
         arguments:
-            $em: '@doctrine.orm.default_entity_manager'
+            $userRepo: '@App\Repository\UserRepository'

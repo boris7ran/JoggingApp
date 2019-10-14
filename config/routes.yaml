@@ -15,7 +15,7 @@ logout_user:
     methods: GET
 
 show_records:
-    path: /records/{id}
+    path: /records/{userId}
     controller: App\Controller\RecordController::show
 
 my_records:
@@ -23,19 +23,19 @@ my_records:
     controller: App\Controller\RecordController::myRecords
 
 store_record:
-    path: /records/user/{id}
+    path: /records/user/{userId}
     controller: App\Controller\RecordController::store
 
 edit_record:
-    path: /records/edit/{id}
+    path: /records/edit/{recordId}
     controller: App\Controller\RecordController::edit
 
 put_record:
-    path: /records/put/{id}
+    path: /records/put/{recordId}
     controller: App\Controller\RecordController::put
 
 delete_record:
-    path: /records/delete/{id}
+    path: /records/delete/{recordId}
     controller: App\Controller\RecordController:delete
 
 all_users:

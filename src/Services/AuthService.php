@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Entity\User;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Repository\Interfaces\UserRepositoryInterface;
 use Error;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -16,39 +16,38 @@ class AuthService
      * @var ValidatorInterface
      */
     private $validator;
+
     /**
-     * @var EntityManagerInterface
+     * @var UserRepositoryInterface
      */
-    private $em;
+    private $userRepo;
 
     /**
      * AuthService constructor.
+     *
      * @param ValidatorInterface $validator
-     * @param EntityManagerInterface $em
+     * @param UserRepositoryInterface $userRepo
      */
-    public function __construct(ValidatorInterface $validator, EntityManagerInterface $em)
+    public function __construct(ValidatorInterface $validator, UserRepositoryInterface $userRepo)
     {
         $this->validator = $validator;
-        $this->em = $em;
+        $this->userRepo = $userRepo;
     }
 
     /**
-     * @param Request $request
+     * @param string $username
+     * @param string $password
      * @param UserPasswordEncoderInterface $passwordEncoder
      *
      * @return User|Response
      */
-    public function storeUser(Request $request, UserPasswordEncoderInterface $passwordEncoder)
+    public function storeUser(string $username, string $password, UserPasswordEncoderInterface $passwordEncoder)
     {
-        $password = $request->get('password');
-        $username = $request->get('name');
-
         $roles[] = "ROLE_USER";
 
         $user = new User($password, $username, $roles);
 
         $password = $passwordEncoder->encodePassword($user, $password);
-
         $user->setPassword($password);
 
         $errors = $this->validator->validate($user, null, ['registration']);
@@ -57,7 +56,7 @@ class AuthService
             throw new Error('This user is not valid!');
         }
 
-        $this->em->getRepository(User::class)->add($user);
+        $this->userRepo->add($user);
 
         return $user;
     }

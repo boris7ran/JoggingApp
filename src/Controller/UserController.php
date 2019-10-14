@@ -39,7 +39,8 @@ class UserController extends AbstractController
      */
     public function upgrade(Request $request, int $id): RedirectResponse
     {
-        $user = $this->usersService->upgradeUser($request, $id);
+        $newRole[] = $request->get('role');
+        $user = $this->usersService->upgradeUser($newRole, $id);
 
         return $this->redirectToRoute('all_users');
     }

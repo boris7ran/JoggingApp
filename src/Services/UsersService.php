@@ -6,6 +6,8 @@ use App\DataTransferObjects\ListUsersDto;
 use App\DataTransferObjects\UserDto;
 use App\Entity\User;
 use App\Repository\UserRepository;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\ORMException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
@@ -62,16 +64,19 @@ class UsersService
     }
 
     /**
-     * @param Request $request
+     * @param array $role
      * @param int $id
      *
      * @return object
+     *
+     * @throws NonUniqueResultException
+     * @throws ORMException
      */
-    public function upgradeUser(Request $request, int $id): object
+    public function upgradeUser(array $role, int $id): object
     {
         $user = $this->userRepo->ofId($id);
 
-        $user->setRoles([$request->get('role')]);
+        $user->setRoles($role);
 
         $errors = $this->validator->validate($user);
 

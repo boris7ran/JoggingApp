@@ -7,7 +7,7 @@ use App\Entity\Record;
 class ListRecordsDto
 {
     /**
-     * @var Record[]
+     * @var RecordDto[]
      */
     private $records;
 
@@ -18,15 +18,16 @@ class ListRecordsDto
      */
     public function __construct(array $records)
     {
+        $this->records = [];
         foreach ($records as $record) {
             $this->records[] = new RecordDto($record);
         }
     }
 
     /**
-     * @return Record[]|null
+     * @return RecordDto[]
      */
-    public function getRecords(): ?array
+    public function getRecords(): array
     {
         return $this->records;
     }
